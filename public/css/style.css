@@ -703,3 +703,114 @@ input:focus, textarea:focus {
 .footer-copy { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.2rem; }
 .footer-name { font-size: 0.85rem; color: var(--gold); font-weight: 600; }
 .footer-roll { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.1rem; }
+/* ══════════════════════════════════════════════
+   ADMIN CRUD — Delete buttons, upload rows,
+   photo previews, video management
+══════════════════════════════════════════════ */
+
+/* ── Admin wish/anon card layout ── */
+.awc-top {
+  display: flex; align-items: flex-start; gap: .6rem;
+}
+.awc-info { flex: 1; }
+.awc-roll {
+  display: inline-block; margin-left: .4rem;
+  font-size: .7rem; color: var(--plum-light);
+  background: rgba(155,89,182,.15); border-radius: 20px;
+  padding: .1rem .5rem;
+}
+.awc-treat { font-size: .75rem; color: var(--rose-light); margin: .15rem 0; }
+
+/* ── Delete button (per card) ── */
+.del-btn {
+  flex-shrink: 0; background: rgba(255,80,80,.1);
+  border: 1px solid rgba(255,80,80,.25); border-radius: 8px;
+  width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;
+  font-size: .9rem; cursor: pointer; color: #ff6b6b;
+  transition: all .2s; -webkit-tap-highlight-color: transparent;
+}
+.del-btn:hover { background: rgba(255,80,80,.25); border-color: #ff6b6b; transform: scale(1.08); }
+.del-btn:active { transform: scale(.95); }
+
+/* ── Wide delete button (video, hero remove) ── */
+.del-btn-wide {
+  width: 100%; display: flex; align-items: center; justify-content: center; gap: .4rem;
+  background: rgba(255,80,80,.1); border: 1px solid rgba(255,80,80,.3);
+  border-radius: var(--radius-sm); padding: .6rem; margin-top: .5rem;
+  color: #ff6b6b; font-size: .85rem; cursor: pointer;
+  transition: all .2s; font-family: 'DM Sans', sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+.del-btn-wide:hover { background: rgba(255,80,80,.22); border-color: #ff6b6b; }
+
+/* ── Clear All button ── */
+.clear-all-btn {
+  width: 100%; margin-top: .8rem;
+  background: rgba(255,80,80,.08); border: 1.5px dashed rgba(255,80,80,.3);
+  border-radius: var(--radius-sm); padding: .65rem;
+  color: #ff8080; font-size: .82rem; cursor: pointer;
+  transition: all .2s; font-family: 'DM Sans', sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+.clear-all-btn:hover { background: rgba(255,80,80,.18); border-color: #ff6b6b; color: #ff6b6b; }
+
+/* ── Admin panel sub-label ── */
+.apanel-note { font-size: .7rem; color: var(--text-muted); font-weight: 400; }
+
+/* ── Upload row (file picker + button side by side) ── */
+.admin-upload-row {
+  display: flex; gap: .5rem; align-items: center; margin-bottom: .6rem; flex-wrap: wrap;
+}
+.file-label {
+  flex: 1; display: flex; align-items: center;
+  background: rgba(255,255,255,.05); border: 1px dashed rgba(255,255,255,.18);
+  border-radius: var(--radius-sm); padding: .55rem .8rem; cursor: pointer;
+  transition: border-color .2s;
+  min-width: 0;
+}
+.file-label:hover { border-color: var(--gold); }
+.file-label input[type="file"] { display: none; }
+.file-label span { font-size: .8rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.upload-btn { flex-shrink: 0; width: auto !important; padding: .55rem 1rem !important; font-size: .82rem !important; }
+
+/* ── Admin gallery grid — with delete overlay ── */
+.admin-gallery-preview {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: .5rem; margin-top: .6rem;
+}
+.admin-photo-wrap {
+  position: relative; aspect-ratio: 1; border-radius: 8px; overflow: hidden;
+  border: 1px solid rgba(255,255,255,.08);
+}
+.admin-photo-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.photo-del-btn {
+  position: absolute; top: 4px; right: 4px;
+  background: rgba(0,0,0,.7); border: 1px solid rgba(255,80,80,.4);
+  border-radius: 6px; width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .8rem; cursor: pointer; color: #ff6b6b;
+  opacity: 0; transition: opacity .2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.admin-photo-wrap:hover .photo-del-btn { opacity: 1; }
+/* Always show on touch devices */
+@media (hover: none) { .photo-del-btn { opacity: 1; } }
+
+/* ── Admin video item ── */
+.admin-video-item { display: flex; flex-direction: column; gap: .3rem; }
+
+/* ── Hero admin slot ── */
+.hero-admin-slot {
+  background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.08);
+  border-radius: var(--radius-sm); padding: .8rem;
+}
+.hero-slot-label { font-size: .78rem; color: var(--gold); margin-bottom: .5rem; font-weight: 600; }
+.hero-preview-img {
+  width: 100%; aspect-ratio: 3/4; object-fit: cover;
+  border-radius: 8px; margin-bottom: .6rem; border: 1px solid rgba(255,255,255,.1);
+  display: block;
+}
+.hero-slot-actions { display: flex; flex-direction: column; gap: .3rem; }
+
+/* ── Toast variants ── */
+.toast-error   { background: rgba(80,20,20,.95) !important; border-color: rgba(255,80,80,.4) !important; }
+.toast-success { background: rgba(20,60,40,.95) !important; border-color: rgba(62,207,142,.4) !important; }
