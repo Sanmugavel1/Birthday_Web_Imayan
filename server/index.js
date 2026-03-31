@@ -22,10 +22,7 @@ app.use('/api/quiz',    require('./routes/quiz'));
 app.use('/api/uploads', require('./routes/uploads'));
 
 // MongoDB + Server
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
+mongoose.connect(process.env.MONGO_URI)
 .then(() => {
   console.log('✅ MongoDB connected');
 
