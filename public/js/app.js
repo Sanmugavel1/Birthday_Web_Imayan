@@ -1,6 +1,6 @@
 // public/js/app.js  — MongoDB version (no Firebase imports)
 
-const API = 'http://localhost:3000';
+const API = '';
 
 // ── Admin password (same as .env) ──
 const ADMIN_PASSWORD = "imayan2026";
