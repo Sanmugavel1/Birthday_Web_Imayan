@@ -3,7 +3,7 @@
 // ════════════════════════════════════════════════════
 
 const API = '';
-const ADMIN_PASSWORD = "imayan2026"; // Change this!
+const ADMIN_PASSWORD = "imayan2026"; // Must match ADMIN_PASSWORD in your .env exactly
 
 // ══ QUIZ DATA ════════════════════════════════════════
 const QUIZ = [
@@ -53,6 +53,16 @@ async function confirmAction(msg) {
   return window.confirm(msg);
 }
 
+// ══ LOADING STATE HELPERS ════════════════════════════
+function setLoading(containerId, msg) {
+  const el = document.getElementById(containerId);
+  if (el) el.innerHTML = `<p class="empty-hint" style="color:var(--gold);opacity:0.7;">⏳ ${msg}</p>`;
+}
+function setError(containerId, msg) {
+  const el = document.getElementById(containerId);
+  if (el) el.innerHTML = `<p class="empty-hint" style="color:#ff8080;">❌ ${msg}<br/><small style="opacity:0.6;">Check your server is running and ADMIN_PASSWORD matches.</small></p>`;
+}
+
 // ══ NAVIGATION ═══════════════════════════════════════
 window.switchTab = function(name, el) {
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -92,16 +102,17 @@ window.submitWish = async function() {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ name, roll, treat, msg })
     });
-    if (!res.ok) throw new Error();
+    if (!res.ok) throw new Error(await res.text());
     ['wishName','wishRoll','wishTreat','wishMsg'].forEach(id => document.getElementById(id).value='');
     showToast('💌 Wish sent! Only Imayan will see it 🎉', 'success');
     loadPublicWishes();
-  } catch(e) { showToast('❌ Failed to send.', 'error'); }
+  } catch(e) { showToast('❌ Failed to send: ' + e.message, 'error'); }
 };
 
 async function loadPublicWishes() {
   try {
     const res  = await fetch(`${API}/api/wishes`);
+    if (!res.ok) throw new Error('Server error ' + res.status);
     const data = await res.json();
     const list = document.getElementById('wishesList');
     if (!data.length) { list.innerHTML = '<p class="empty-hint">Be the first to send a wish! 🌟</p>'; return; }
@@ -119,13 +130,15 @@ async function loadPublicWishes() {
         <div class="wc-time">${formatTime(d.createdAt)}</div>`;
       list.appendChild(div);
     });
-  } catch(e) { console.error(e); }
+  } catch(e) { console.error('loadPublicWishes:', e); }
 }
 
 // Admin: load wishes with delete buttons
 async function loadAdminWishes() {
+  setLoading('adminWishesList', 'Loading wishes...');
   try {
     const res  = await fetch(`${API}/api/wishes`);
+    if (!res.ok) throw new Error('Server error ' + res.status);
     const data = await res.json();
     const list = document.getElementById('adminWishesList');
 
@@ -149,7 +162,6 @@ async function loadAdminWishes() {
       list.appendChild(div);
     });
 
-    // "Clear all" button
     if (data.length > 0) {
       const clearBtn = document.createElement('button');
       clearBtn.className = 'clear-all-btn';
@@ -157,27 +169,28 @@ async function loadAdminWishes() {
       clearBtn.onclick = clearAllWishes;
       list.appendChild(clearBtn);
     }
-  } catch(e) { console.error(e); }
+  } catch(e) { setError('adminWishesList', 'Could not load wishes'); console.error(e); }
 }
 
 window.deleteWish = async function(id) {
   if (!await confirmAction('Delete this wish? This cannot be undone.')) return;
   try {
     const res = await fetch(`${API}/api/wishes/${id}`, { method:'DELETE', headers: adminHeaders() });
-    if (!res.ok) throw new Error();
+    if (!res.ok) throw new Error('Status: ' + res.status);
     document.getElementById('wish-' + id)?.remove();
     showToast('🗑️ Wish deleted', 'success');
     loadPublicWishes();
-  } catch(e) { showToast('❌ Delete failed', 'error'); }
+  } catch(e) { showToast('❌ Delete failed — check server & password', 'error'); console.error(e); }
 };
 
 async function clearAllWishes() {
   if (!await confirmAction('Delete ALL wishes permanently? This cannot be undone!')) return;
   try {
-    await fetch(`${API}/api/wishes`, { method:'DELETE', headers: adminHeaders() });
+    const res = await fetch(`${API}/api/wishes`, { method:'DELETE', headers: adminHeaders() });
+    if (!res.ok) throw new Error('Status: ' + res.status);
     showToast('🗑️ All wishes cleared', 'success');
     loadAdminWishes(); loadPublicWishes();
-  } catch(e) { showToast('❌ Failed', 'error'); }
+  } catch(e) { showToast('❌ Failed — check server & password', 'error'); console.error(e); }
 }
 
 // ══════════════════════════════════════════════════════
@@ -185,25 +198,27 @@ async function clearAllWishes() {
 // ══════════════════════════════════════════════════════
 
 window.submitAnon = async function() {
-  const msg = document.getElementById('anonMsg').value.trim();
+  const msgEl = document.getElementById('anonMsg');
+  const msg = msgEl ? msgEl.value.trim() : '';
   if (!msg) { showToast('⚠️ Please type your message'); return; }
   try {
     const res = await fetch(`${API}/api/anon`, {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ msg })
     });
-    if (!res.ok) throw new Error();
-    document.getElementById('anonMsg').value = '';
-    document.getElementById('anonChars').textContent = '500 characters remaining';
+    if (!res.ok) throw new Error(await res.text());
+    if (msgEl) msgEl.value = '';
+    const charsEl = document.getElementById('anonChars');
+    if (charsEl) charsEl.textContent = '500 characters remaining';
     showToast('🕵️ Sent anonymously!', 'success');
     loadAnon(); loadTopAnonHome();
-  } catch(e) { showToast('❌ Failed to send.', 'error'); }
+  } catch(e) { showToast('❌ Failed to send: ' + e.message, 'error'); }
 };
 
-// Guard: anonMsg may not be accessible if mainSite is not yet visible
-const anonMsgEl = document.getElementById('anonMsg');
-if (anonMsgEl) {
-  anonMsgEl.addEventListener('input', function() {
+// Guard the anonMsg listener — element exists in hidden DOM so this is safe
+const _anonMsgEl = document.getElementById('anonMsg');
+if (_anonMsgEl) {
+  _anonMsgEl.addEventListener('input', function() {
     const charsEl = document.getElementById('anonChars');
     if (charsEl) charsEl.textContent = (500 - this.value.length) + ' characters remaining';
   });
@@ -213,7 +228,8 @@ window.likeAnon = async function(id, btn) {
   const liked = getLikedSet();
   if (liked.has(id)) { showToast('💛 Already liked!'); return; }
   try {
-    await fetch(`${API}/api/anon/${id}/like`, { method:'PATCH' });
+    const res = await fetch(`${API}/api/anon/${id}/like`, { method:'PATCH' });
+    if (!res.ok) throw new Error();
     liked.add(id); saveLikedSet(liked);
     btn.classList.add('liked');
     const countEl = btn.querySelector('.like-count');
@@ -226,6 +242,7 @@ window.likeAnon = async function(id, btn) {
 async function loadAnon() {
   try {
     const res  = await fetch(`${API}/api/anon`);
+    if (!res.ok) throw new Error('Server error ' + res.status);
     const data = await res.json();
     const list = document.getElementById('anonList');
     if (!data.length) { list.innerHTML = '<p class="empty-hint">No anonymous messages yet...</p>'; return; }
@@ -246,12 +263,13 @@ async function loadAnon() {
         </div>`;
       list.appendChild(div);
     });
-  } catch(e) { console.error(e); }
+  } catch(e) { console.error('loadAnon:', e); }
 }
 
 async function loadTopAnonHome() {
   try {
     const res = await fetch(`${API}/api/anon/top`);
+    if (!res.ok) return;
     const d   = await res.json();
     if (!d) return;
     document.getElementById('topAnonMsg').textContent   = `"${d.msg}"`;
@@ -262,8 +280,10 @@ async function loadTopAnonHome() {
 
 // Admin: load anon with delete buttons
 async function loadAdminAnon() {
+  setLoading('adminAnonList', 'Loading anonymous messages...');
   try {
     const res  = await fetch(`${API}/api/anon`);
+    if (!res.ok) throw new Error('Server error ' + res.status);
     const data = (await res.json()).sort((a,b) => b.likes - a.likes);
     const list = document.getElementById('adminAnonList');
 
@@ -293,28 +313,29 @@ async function loadAdminAnon() {
       clearBtn.onclick = clearAllAnon;
       list.appendChild(clearBtn);
     }
-  } catch(e) { console.error(e); }
+  } catch(e) { setError('adminAnonList', 'Could not load messages'); console.error(e); }
 }
 
 window.deleteAnon = async function(id) {
   if (!await confirmAction('Delete this anonymous message?')) return;
   try {
     const res = await fetch(`${API}/api/anon/${id}`, { method:'DELETE', headers: adminHeaders() });
-    if (!res.ok) throw new Error();
+    if (!res.ok) throw new Error('Status: ' + res.status + ' — check ADMIN_PASSWORD in .env');
     document.getElementById('anon-' + id)?.remove();
     showToast('🗑️ Message deleted', 'success');
     loadAnon(); loadTopAnonHome();
-  } catch(e) { showToast('❌ Delete failed', 'error'); }
+  } catch(e) { showToast('❌ Delete failed — ' + e.message, 'error'); console.error(e); }
 };
 
 async function clearAllAnon() {
   if (!await confirmAction('Delete ALL anonymous messages permanently?')) return;
   try {
-    await fetch(`${API}/api/anon`, { method:'DELETE', headers: adminHeaders() });
+    const res = await fetch(`${API}/api/anon`, { method:'DELETE', headers: adminHeaders() });
+    if (!res.ok) throw new Error('Status: ' + res.status);
     showToast('🗑️ All messages cleared', 'success');
     loadAdminAnon(); loadAnon(); loadTopAnonHome();
     document.getElementById('topAnonCard').style.display = 'none';
-  } catch(e) { showToast('❌ Failed', 'error'); }
+  } catch(e) { showToast('❌ Failed — check server & password', 'error'); console.error(e); }
 }
 
 // ══════════════════════════════════════════════════════
@@ -413,6 +434,7 @@ window.resetQuiz = function() {
 async function loadLeaderboardPreview() {
   try {
     const res  = await fetch(`${API}/api/quiz`);
+    if (!res.ok) return;
     const data = await res.json();
     const el   = document.getElementById('leaderPreview');
     if (!data.length) { el.innerHTML=''; return; }
@@ -432,6 +454,7 @@ async function loadLeaderboardPreview() {
 async function loadChampion() {
   try {
     const res  = await fetch(`${API}/api/quiz`);
+    if (!res.ok) return;
     const data = await res.json();
     if (!data.length) return;
     const best = new Map();
@@ -446,8 +469,10 @@ async function loadChampion() {
 
 // Admin: quiz leaderboard with delete
 async function loadAdminQuiz() {
+  setLoading('adminQuizList', 'Loading quiz scores...');
   try {
     const res  = await fetch(`${API}/api/quiz`);
+    if (!res.ok) throw new Error('Server error ' + res.status);
     const data = await res.json();
     const list = document.getElementById('adminQuizList');
 
@@ -475,27 +500,29 @@ async function loadAdminQuiz() {
     clearBtn.textContent = '🗑️ Reset Full Leaderboard';
     clearBtn.onclick = clearAllQuiz;
     list.appendChild(clearBtn);
-  } catch(e) { console.error(e); }
+  } catch(e) { setError('adminQuizList', 'Could not load quiz scores'); console.error(e); }
 }
 
 window.deleteQuizEntry = async function(id) {
   if (!await confirmAction('Delete this quiz entry?')) return;
   try {
-    await fetch(`${API}/api/quiz/${id}`, { method:'DELETE', headers: adminHeaders() });
+    const res = await fetch(`${API}/api/quiz/${id}`, { method:'DELETE', headers: adminHeaders() });
+    if (!res.ok) throw new Error('Status: ' + res.status);
     document.getElementById('quiz-' + id)?.remove();
     showToast('🗑️ Entry deleted', 'success');
     loadChampion(); loadLeaderboardPreview();
-  } catch(e) { showToast('❌ Delete failed', 'error'); }
+  } catch(e) { showToast('❌ Delete failed — check server & password', 'error'); console.error(e); }
 };
 
 async function clearAllQuiz() {
   if (!await confirmAction('Reset the ENTIRE quiz leaderboard? This cannot be undone!')) return;
   try {
-    await fetch(`${API}/api/quiz`, { method:'DELETE', headers: adminHeaders() });
+    const res = await fetch(`${API}/api/quiz`, { method:'DELETE', headers: adminHeaders() });
+    if (!res.ok) throw new Error('Status: ' + res.status);
     showToast('🗑️ Leaderboard reset', 'success');
     loadAdminQuiz(); loadChampion(); loadLeaderboardPreview();
     document.getElementById('quizChampion').style.display = 'none';
-  } catch(e) { showToast('❌ Failed', 'error'); }
+  } catch(e) { showToast('❌ Failed — check server & password', 'error'); console.error(e); }
 }
 
 // ══════════════════════════════════════════════════════
@@ -510,18 +537,22 @@ window.uploadGalleryPhotos = async function() {
   [...input.files].forEach(f => fd.append('photos', f));
   try {
     const res = await fetch(`${API}/api/uploads/gallery`, {
-      method:'POST', headers: adminHeaders(), body: fd
+      method:'POST',
+      headers: adminHeaders(), // DO NOT add Content-Type here — browser sets it with boundary
+      body: fd
     });
-    if (!res.ok) throw new Error(await res.text());
+    if (!res.ok) throw new Error('Status: ' + res.status + ' — check ADMIN_PASSWORD in .env');
     input.value = '';
+    document.getElementById('galleryFileLabel').textContent = '📁 Choose photos (multiple ok)';
     showToast('✅ Photos uploaded!', 'success');
     loadGallery(); loadAdminGallery();
-  } catch(e) { showToast('❌ Upload failed: ' + e.message, 'error'); }
+  } catch(e) { showToast('❌ Upload failed: ' + e.message, 'error'); console.error(e); }
 };
 
 async function loadGallery() {
   try {
     const res  = await fetch(`${API}/api/uploads/gallery`);
+    if (!res.ok) throw new Error();
     const data = await res.json();
     const grid = document.getElementById('galleryGrid');
     if (!data.length) { grid.innerHTML = '<p class="empty-hint">Photos coming soon! 📸</p>'; return; }
@@ -537,10 +568,11 @@ async function loadGallery() {
   } catch(e) { console.error(e); }
 }
 
-// Admin gallery with delete per photo + clear all
 async function loadAdminGallery() {
+  setLoading('adminGallery', 'Loading gallery...');
   try {
     const res  = await fetch(`${API}/api/uploads/gallery`);
+    if (!res.ok) throw new Error('Server error ' + res.status);
     const data = await res.json();
     const grid = document.getElementById('adminGallery');
     grid.innerHTML = '';
@@ -561,14 +593,13 @@ async function loadAdminGallery() {
       grid.appendChild(wrap);
     });
 
-    // Clear all button
     const clearBtn = document.createElement('button');
     clearBtn.className = 'clear-all-btn';
     clearBtn.style.gridColumn = '1/-1';
     clearBtn.textContent = '🗑️ Delete All Gallery Photos';
     clearBtn.onclick = clearAllGallery;
     grid.appendChild(clearBtn);
-  } catch(e) { console.error(e); }
+  } catch(e) { setError('adminGallery', 'Could not load gallery'); console.error(e); }
 }
 
 window.deleteGalleryPhoto = async function(filename, btn) {
@@ -577,20 +608,21 @@ window.deleteGalleryPhoto = async function(filename, btn) {
     const res = await fetch(`${API}/api/uploads/gallery/${encodeURIComponent(filename)}`, {
       method:'DELETE', headers: adminHeaders()
     });
-    if (!res.ok) throw new Error();
+    if (!res.ok) throw new Error('Status: ' + res.status);
     btn.closest('.admin-photo-wrap').remove();
     showToast('🗑️ Photo deleted', 'success');
     loadGallery();
-  } catch(e) { showToast('❌ Delete failed', 'error'); }
+  } catch(e) { showToast('❌ Delete failed — check server & password', 'error'); console.error(e); }
 };
 
 async function clearAllGallery() {
   if (!await confirmAction('Delete ALL gallery photos permanently?')) return;
   try {
-    await fetch(`${API}/api/uploads/gallery`, { method:'DELETE', headers: adminHeaders() });
+    const res = await fetch(`${API}/api/uploads/gallery`, { method:'DELETE', headers: adminHeaders() });
+    if (!res.ok) throw new Error('Status: ' + res.status);
     showToast('🗑️ Gallery cleared', 'success');
     loadAdminGallery(); loadGallery();
-  } catch(e) { showToast('❌ Failed', 'error'); }
+  } catch(e) { showToast('❌ Failed — check server & password', 'error'); console.error(e); }
 }
 
 // ══════════════════════════════════════════════════════
@@ -606,18 +638,22 @@ window.uploadVideo = async function() {
   fd.append('video', input.files[0]);
   try {
     const res = await fetch(`${API}/api/uploads/video`, {
-      method:'POST', headers: adminHeaders(), body: fd
+      method:'POST',
+      headers: adminHeaders(), // DO NOT add Content-Type — browser sets it with boundary
+      body: fd
     });
-    if (!res.ok) throw new Error(await res.text());
+    if (!res.ok) throw new Error('Status: ' + res.status + ' — check ADMIN_PASSWORD in .env');
     status.textContent = '✅ Video uploaded!';
     input.value = '';
+    document.getElementById('videoFileLabel').textContent = '📁 Choose video file';
     loadVideo(); loadAdminVideo();
-  } catch(e) { status.textContent = '❌ Upload failed: ' + e.message; }
+  } catch(e) { status.textContent = '❌ Upload failed: ' + e.message; console.error(e); }
 };
 
 async function loadVideo() {
   try {
     const res  = await fetch(`${API}/api/uploads/video`);
+    if (!res.ok) throw new Error();
     const data = await res.json();
     const wrap = document.getElementById('videoWrap');
     const vid  = document.getElementById('mainVideo');
@@ -633,10 +669,10 @@ async function loadVideo() {
   } catch(e) {}
 }
 
-// Admin: show current video with replace + delete
 async function loadAdminVideo() {
   try {
     const res  = await fetch(`${API}/api/uploads/video`);
+    if (!res.ok) throw new Error();
     const data = await res.json();
     const container = document.getElementById('adminVideoPreview');
     if (!container) return;
@@ -658,22 +694,23 @@ async function loadAdminVideo() {
 window.deleteVideo = async function() {
   if (!await confirmAction('Delete the birthday video?')) return;
   try {
-    await fetch(`${API}/api/uploads/video`, { method:'DELETE', headers: adminHeaders() });
+    const res = await fetch(`${API}/api/uploads/video`, { method:'DELETE', headers: adminHeaders() });
+    if (!res.ok) throw new Error('Status: ' + res.status);
     showToast('🗑️ Video deleted', 'success');
     loadVideo(); loadAdminVideo();
     document.getElementById('videoStatus').textContent = '';
-  } catch(e) { showToast('❌ Delete failed', 'error'); }
+  } catch(e) { showToast('❌ Delete failed — check server & password', 'error'); console.error(e); }
 };
 
 // ══════════════════════════════════════════════════════
 //  HERO PHOTOS
 // ══════════════════════════════════════════════════════
 
-// Load hero photos on site init from server
 async function loadHeroPhotos() {
   try {
     const res  = await fetch(`${API}/api/uploads/hero`);
-    const data = await res.json(); // { 1: {url, filename}, 2: {url, filename} }
+    if (!res.ok) return;
+    const data = await res.json();
     [1,2].forEach(n => {
       if (data[n]) {
         const img = document.getElementById('heroImg' + n);
@@ -692,35 +729,38 @@ window.uploadHeroPhoto = async function(num) {
   fd.append('photo', input.files[0]);
   try {
     const res  = await fetch(`${API}/api/uploads/hero/${num}`, {
-      method:'POST', headers: adminHeaders(), body: fd
+      method:'POST',
+      headers: adminHeaders(), // DO NOT add Content-Type — browser sets it with boundary
+      body: fd
     });
-    if (!res.ok) throw new Error(await res.text());
+    if (!res.ok) throw new Error('Status: ' + res.status + ' — check ADMIN_PASSWORD in .env');
     const data = await res.json();
     status.textContent = `✅ Photo ${num} updated!`;
     input.value = '';
-    // Update displayed hero image
+    document.getElementById('heroFileLabel' + num).textContent = '📁 Choose new photo';
     const img = document.getElementById('heroImg' + num);
-    if (img) { img.src = data.url; }
+    if (img) img.src = data.url;
     loadAdminHero();
-  } catch(e) { status.textContent = '❌ Upload failed: ' + e.message; }
+  } catch(e) { status.textContent = '❌ Upload failed: ' + e.message; console.error(e); }
 };
 
 window.deleteHeroPhoto = async function(num) {
   if (!await confirmAction(`Delete Hero Photo ${num}?`)) return;
   try {
-    await fetch(`${API}/api/uploads/hero/${num}`, { method:'DELETE', headers: adminHeaders() });
+    const res = await fetch(`${API}/api/uploads/hero/${num}`, { method:'DELETE', headers: adminHeaders() });
+    if (!res.ok) throw new Error('Status: ' + res.status);
     showToast(`🗑️ Hero Photo ${num} deleted`, 'success');
-    // Revert to default embedded photo
     const img = document.getElementById('heroImg' + num);
     if (img) img.src = `assets/photo${num}.jpeg`;
     loadAdminHero();
     document.getElementById('heroStatus').textContent = `Photo ${num} removed — showing default.`;
-  } catch(e) { showToast('❌ Delete failed', 'error'); }
+  } catch(e) { showToast('❌ Delete failed — check server & password', 'error'); console.error(e); }
 };
 
 async function loadAdminHero() {
   try {
     const res  = await fetch(`${API}/api/uploads/hero`);
+    if (!res.ok) throw new Error();
     const data = await res.json();
     [1,2].forEach(n => {
       const previewEl = document.getElementById('heroPreview' + n);
@@ -755,6 +795,7 @@ window.adminLogin = function() {
   if (document.getElementById('adminPass').value === ADMIN_PASSWORD) {
     document.getElementById('adminLogin').classList.add('hidden');
     document.getElementById('adminPanel').classList.remove('hidden');
+    // Load all admin data
     loadAdminWishes();
     loadAdminAnon();
     loadAdminGallery();
@@ -772,7 +813,7 @@ window.switchAdminTab = function(name, el) {
   document.querySelectorAll('.atab').forEach(t => t.classList.remove('active'));
   document.getElementById(name).classList.add('active');
   el.classList.add('active');
-  // Lazy load tab content
+  // Reload content when tab is switched
   if (name==='aVideo')  loadAdminVideo();
   if (name==='aHero')   loadAdminHero();
   if (name==='aPhotos') loadAdminGallery();
@@ -794,4 +835,5 @@ window.closeLightbox = function(e) {
   document.getElementById('lightbox').classList.add('hidden');
 };
 
-// NOTE: loadPublicWishes() is called inside enterSite() — do NOT call it here on raw load.
+// ══ INIT — called after enterSite(), not on raw page load ═════
+// (loadPublicWishes, loadAnon etc. are called inside enterSite())
