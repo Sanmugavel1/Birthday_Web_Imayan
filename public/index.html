@@ -60,20 +60,24 @@
   <!-- ══ HOME TAB ══ -->
   <section id="tab-home" class="tab-content active">
     <div class="hero-section">
+
       <div class="hero-photos">
-        <div class="photo-slot" onclick="openLightbox(document.getElementById('heroImg1').src)">
+        <div class="photo-slot" onclick="openLightbox('assets/photo1.jpeg')">
           <img src="assets/photo1.jpeg" class="hero-img" alt="Imayan" id="heroImg1" />
         </div>
-        <div class="photo-slot" onclick="openLightbox(document.getElementById('heroImg2').src)">
+        <div class="photo-slot" onclick="openLightbox('assets/photo2.jpeg')">
           <img src="assets/photo2.jpeg" class="hero-img" alt="Imayan" id="heroImg2" />
         </div>
       </div>
+
       <div class="hero-text">
         <p class="hero-eyebrow">Wishing a very</p>
         <h2 class="hero-title">Happy<br/><em>Birthday</em></h2>
         <p class="hero-name-big">Imayan!</p>
         <div class="confetti-strip">🎉🎊🥳🎈🎁🎂</div>
       </div>
+
+      <!-- Quiz Champion Banner -->
       <div class="quiz-champion-card" id="quizChampion" style="display:none;">
         <div class="qc-crown">👑</div>
         <p class="qc-label">Imayan's #1 Well-Knower</p>
@@ -81,11 +85,14 @@
         <p class="qc-score" id="qcScore"></p>
         <p class="qc-quote">"Knows Imayan better than Imayan knows himself 😂"</p>
       </div>
+
+      <!-- Top Liked Anonymous Message -->
       <div class="top-anon-card" id="topAnonCard" style="display:none;">
         <div class="top-anon-header"><span>🔥</span><p>Most Loved Anonymous Message</p></div>
         <p class="top-anon-msg" id="topAnonMsg"></p>
         <p class="top-anon-likes" id="topAnonLikes"></p>
       </div>
+
       <div class="countdown-card">
         <p class="cd-label">🎂 Birthday Countdown</p>
         <div class="cd-grid">
@@ -96,6 +103,7 @@
         </div>
         <p id="birthdayMsg" class="bd-msg hidden">🎂 Today is the big day! Happy Birthday Imayan! 🎉</p>
       </div>
+
       <div class="quote-card">
         <p class="quote-text">"May your birthday be the start of a year filled with good luck, good health, and much happiness."</p>
         <p class="quote-from">— With love, your friends 💛</p>
@@ -143,6 +151,7 @@
       <h2>🧠 Know Imayan?</h2>
       <p>Prove you know him better than anyone!</p>
     </div>
+
     <div id="quizEntry" class="card wish-form">
       <div class="quiz-entry-hero">
         <span class="quiz-entry-emoji">🎯</span>
@@ -154,6 +163,7 @@
       <button class="submit-btn quiz-start-btn" onclick="startQuiz()"><span>Start Quiz 🚀</span></button>
       <div id="leaderPreview"></div>
     </div>
+
     <div id="quizGame" class="hidden">
       <div class="quiz-progress-wrap">
         <div class="qp-bar"><div class="qp-fill" id="qpFill" style="width:10%"></div></div>
@@ -167,6 +177,7 @@
         <button class="submit-btn quiz-next-btn hidden" id="quizNextBtn" onclick="nextQuestion()">Next →</button>
       </div>
     </div>
+
     <div id="quizResult" class="hidden">
       <div class="result-card card">
         <div class="result-emoji" id="resultEmoji">🏆</div>
@@ -197,7 +208,7 @@
 
 </div><!-- end mainSite -->
 
-<!-- ══ FOOTER ══ -->
+<!-- ══════════════════ FOOTER ══════════════════ -->
 <footer class="site-footer" id="siteFooter" style="display:none;">
   <div class="footer-divider"></div>
   <div class="footer-inner">
@@ -214,7 +225,7 @@
   <div class="modal-box">
     <button class="modal-close" onclick="closeAdmin()">✕</button>
 
-    <!-- Login -->
+    <!-- LOGIN -->
     <div id="adminLogin">
       <h3>Admin Login</h3>
       <p>Only Imayan can access this</p>
@@ -223,10 +234,9 @@
       <p id="loginError" class="error-msg hidden">Wrong password. Try again.</p>
     </div>
 
-    <!-- Panel -->
+    <!-- PANEL -->
     <div id="adminPanel" class="hidden">
       <h3>⚙️ Admin Panel</h3>
-
       <div class="admin-tabs">
         <button class="atab active" onclick="switchAdminTab('aWishes',this)">💌 Wishes</button>
         <button class="atab" onclick="switchAdminTab('aAnon',this)">🕵️ Anon</button>
@@ -236,99 +246,105 @@
         <button class="atab" onclick="switchAdminTab('aHero',this)">🖼️ Hero</button>
       </div>
 
-      <!-- ── Wishes ── -->
+      <!-- ── WISHES ── -->
       <div id="aWishes" class="apanel active">
-        <h4>All Wishes <span class="apanel-note">(private — with delete)</span></h4>
+        <h4>All Wishes <span class="apanel-note">(private — only you see these)</span></h4>
         <div id="adminWishesList" class="admin-list"></div>
       </div>
 
-      <!-- ── Anonymous ── -->
+      <!-- ── ANON ── -->
       <div id="aAnon" class="apanel hidden">
-        <h4>Anonymous Messages <span class="apanel-note">(sorted by likes)</span></h4>
-        <p class="admin-note">📋 Only you can see these. You can delete any message.</p>
+        <h4>Anonymous Messages <span class="apanel-note">(identities hidden)</span></h4>
         <div id="adminAnonList" class="admin-list"></div>
       </div>
 
-      <!-- ── Quiz ── -->
+      <!-- ── QUIZ ── -->
       <div id="aQuiz" class="apanel hidden">
-        <h4>Quiz Leaderboard <span class="apanel-note">(full, with delete)</span></h4>
+        <h4>Full Quiz Leaderboard</h4>
         <div id="adminQuizList" class="admin-list"></div>
       </div>
 
-      <!-- ── Gallery ── -->
+      <!-- ── GALLERY PHOTOS ── -->
       <div id="aPhotos" class="apanel hidden">
-        <h4>Gallery Photos</h4>
+        <h4>Manage Gallery Photos</h4>
+
+        <!-- Upload row -->
         <div class="admin-upload-row">
-          <label class="file-label">
+          <label class="file-label" for="galleryUpload">
             <input type="file" id="galleryUpload" accept="image/*" multiple />
-            <span>📎 Choose Photos</span>
+            <span id="galleryFileLabel">📁 Choose photos (multiple ok)</span>
           </label>
-          <button class="submit-btn upload-btn" onclick="uploadGalleryPhotos()">Upload ↑</button>
+          <button class="submit-btn upload-btn" onclick="uploadGalleryPhotos()">Upload</button>
         </div>
+
+        <!-- Current photos grid with delete -->
         <div id="adminGallery" class="admin-gallery-preview"></div>
       </div>
 
-      <!-- ── Video ── -->
+      <!-- ── VIDEO ── -->
       <div id="aVideo" class="apanel hidden">
         <h4>Birthday Video</h4>
+
+        <!-- Upload row -->
         <div class="admin-upload-row">
-          <label class="file-label">
+          <label class="file-label" for="videoUpload">
             <input type="file" id="videoUpload" accept="video/*" />
-            <span>📎 Choose Video</span>
+            <span id="videoFileLabel">📁 Choose video file</span>
           </label>
-          <button class="submit-btn upload-btn" onclick="uploadVideo()">Upload ↑</button>
+          <button class="submit-btn upload-btn" onclick="uploadVideo()">Upload</button>
         </div>
         <p id="videoStatus" class="status-msg"></p>
-        <div id="adminVideoPreview" style="margin-top:.8rem;"></div>
+
+        <!-- Current video preview + delete -->
+        <div id="adminVideoPreview"></div>
       </div>
 
-      <!-- ── Hero Photos ── -->
+      <!-- ── HERO PHOTOS ── -->
       <div id="aHero" class="apanel hidden">
-        <h4>Home Page Photos</h4>
-        <p class="admin-note">Upload new photos to replace the hero images on the home page.</p>
+        <h4>Home Page Hero Photos</h4>
+        <p id="heroStatus" class="status-msg"></p>
 
-        <!-- Photo 1 -->
-        <div class="hero-admin-slot">
-          <p class="hero-slot-label">📸 Photo 1 (Left side)</p>
+        <!-- Hero Slot 1 -->
+        <div class="hero-admin-slot" style="margin-bottom:.8rem;">
+          <p class="hero-slot-label">📸 Photo 1 (Left)</p>
           <img id="heroPreview1" src="assets/photo1.jpeg" class="hero-preview-img" alt="Hero 1" />
           <div class="hero-slot-actions">
             <div class="admin-upload-row">
-              <label class="file-label">
+              <label class="file-label" for="heroUpload1">
                 <input type="file" id="heroUpload1" accept="image/*" />
-                <span>📎 New Photo 1</span>
+                <span id="heroFileLabel1">📁 Choose new photo</span>
               </label>
-              <button class="submit-btn upload-btn" onclick="uploadHeroPhoto(1)">Upload ↑</button>
+              <button class="submit-btn upload-btn" onclick="uploadHeroPhoto(1)">Upload</button>
             </div>
-            <button id="heroDelBtn1" class="del-btn-wide" onclick="deleteHeroPhoto(1)" style="display:none;">🗑️ Remove Photo 1</button>
+            <button class="del-btn-wide" id="heroDelBtn1" style="display:none;" onclick="deleteHeroPhoto(1)">🗑️ Remove — Revert to Default</button>
           </div>
         </div>
 
-        <!-- Photo 2 -->
-        <div class="hero-admin-slot" style="margin-top:1rem;">
-          <p class="hero-slot-label">📸 Photo 2 (Right side)</p>
+        <!-- Hero Slot 2 -->
+        <div class="hero-admin-slot">
+          <p class="hero-slot-label">📸 Photo 2 (Right)</p>
           <img id="heroPreview2" src="assets/photo2.jpeg" class="hero-preview-img" alt="Hero 2" />
           <div class="hero-slot-actions">
             <div class="admin-upload-row">
-              <label class="file-label">
+              <label class="file-label" for="heroUpload2">
                 <input type="file" id="heroUpload2" accept="image/*" />
-                <span>📎 New Photo 2</span>
+                <span id="heroFileLabel2">📁 Choose new photo</span>
               </label>
-              <button class="submit-btn upload-btn" onclick="uploadHeroPhoto(2)">Upload ↑</button>
+              <button class="submit-btn upload-btn" onclick="uploadHeroPhoto(2)">Upload</button>
             </div>
-            <button id="heroDelBtn2" class="del-btn-wide" onclick="deleteHeroPhoto(2)" style="display:none;">🗑️ Remove Photo 2</button>
+            <button class="del-btn-wide" id="heroDelBtn2" style="display:none;" onclick="deleteHeroPhoto(2)">🗑️ Remove — Revert to Default</button>
           </div>
         </div>
-        <p id="heroStatus" class="status-msg" style="margin-top:.5rem;"></p>
       </div>
 
     </div><!-- end adminPanel -->
   </div>
 </div>
 
-<!-- Toast -->
+<!-- TOAST -->
 <div id="toast" class="toast hidden"></div>
 
-<!-- Lightbox -->
+<!-- LIGHTBOX -->
 <div id="lightbox" class="lightbox hidden" onclick="closeLightbox()">
   <img id="lightboxImg" src="" alt="" />
   <button class="lb-close" onclick="closeLightbox(event)">✕</button>
@@ -337,5 +353,27 @@
 <script src="js/app.js"></script>
 <script src="js/confetti.js"></script>
 <script src="js/countdown.js"></script>
+
+<!-- Show filename in file labels -->
+<script>
+  document.addEventListener('change', function(e) {
+    if (e.target.type !== 'file') return;
+    const map = {
+      galleryUpload: 'galleryFileLabel',
+      videoUpload:   'videoFileLabel',
+      heroUpload1:   'heroFileLabel1',
+      heroUpload2:   'heroFileLabel2'
+    };
+    const labelId = map[e.target.id];
+    if (!labelId) return;
+    const lbl = document.getElementById(labelId);
+    if (!lbl) return;
+    const files = e.target.files;
+    lbl.textContent = files.length > 1
+      ? `✅ ${files.length} files selected`
+      : files[0]?.name || '📁 Choose file';
+  });
+</script>
+
 </body>
 </html>
