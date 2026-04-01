@@ -118,9 +118,9 @@ router.get('/hero', (req, res) => {
   const files = fs.readdirSync(dir);
   const result = {};
   [1, 2].forEach(n => {
-    // Find file whose name contains _photo{n}_ or ends with _{n}.ext
+    // Strictly match files named with _photoN (e.g. 1234567_photo1.jpg)
     const match = files
-      .filter(f => f.includes(`_photo${n}`) || new RegExp(`_${n}\\.[a-z]+$`, 'i').test(f))
+      .filter(f => f.includes(`_photo${n}.`) || f.includes(`_photo${n}_`))
       .sort()
       .pop();
     if (match) result[n] = { filename: match, url: `/uploads/hero/${match}` };

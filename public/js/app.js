@@ -200,9 +200,14 @@ window.submitAnon = async function() {
   } catch(e) { showToast('❌ Failed to send.', 'error'); }
 };
 
-document.getElementById('anonMsg').addEventListener('input', function() {
-  document.getElementById('anonChars').textContent = (500 - this.value.length) + ' characters remaining';
-});
+// Guard: anonMsg may not be accessible if mainSite is not yet visible
+const anonMsgEl = document.getElementById('anonMsg');
+if (anonMsgEl) {
+  anonMsgEl.addEventListener('input', function() {
+    const charsEl = document.getElementById('anonChars');
+    if (charsEl) charsEl.textContent = (500 - this.value.length) + ' characters remaining';
+  });
+}
 
 window.likeAnon = async function(id, btn) {
   const liked = getLikedSet();
@@ -789,5 +794,4 @@ window.closeLightbox = function(e) {
   document.getElementById('lightbox').classList.add('hidden');
 };
 
-// ══ INIT ═════════════════════════════════════════════
-loadPublicWishes();
+// NOTE: loadPublicWishes() is called inside enterSite() — do NOT call it here on raw load.
