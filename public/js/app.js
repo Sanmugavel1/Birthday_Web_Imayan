@@ -1,5 +1,7 @@
 // ════════════════════════════════════════════════════
 //  public/js/app.js  — MongoDB backend, Full Admin CRUD
+//  Upload method: FileReader base64 → MongoDB (same as portfolio)
+//  Works on Render free tier — NO disk needed!
 // ════════════════════════════════════════════════════
 
 const API = '';
@@ -46,7 +48,7 @@ window.showToast = function(msg, type='normal') {
 };
 
 function adminHeaders() {
-  return { 'x-admin-pass': ADMIN_PASSWORD };
+  return { 'Content-Type': 'application/json', 'x-admin-pass': ADMIN_PASSWORD };
 }
 
 async function confirmAction(msg) {
@@ -61,6 +63,20 @@ function setLoading(containerId, msg) {
 function setError(containerId, msg) {
   const el = document.getElementById(containerId);
   if (el) el.innerHTML = `<p class="empty-hint" style="color:#ff8080;">❌ ${msg}<br/><small style="opacity:0.6;">Check your server is running and ADMIN_PASSWORD matches.</small></p>`;
+}
+
+// ══════════════════════════════════════════════════════
+//  BASE64 HELPER — same pattern as your portfolio's
+//  FileReader → readAsDataURL → send as JSON to MongoDB
+// ══════════════════════════════════════════════════════
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload  = (e) => resolve(e.target.result); // returns "data:image/jpeg;base64,..."
+    reader.onerror = () => reject(new Error('Failed to read file'));
+    reader.readAsDataURL(file);
+  });
 }
 
 // ══ NAVIGATION ═══════════════════════════════════════
@@ -133,7 +149,6 @@ async function loadPublicWishes() {
   } catch(e) { console.error('loadPublicWishes:', e); }
 }
 
-// Admin: load wishes with delete buttons
 async function loadAdminWishes() {
   setLoading('adminWishesList', 'Loading wishes...');
   try {
@@ -184,7 +199,7 @@ window.deleteWish = async function(id) {
 };
 
 async function clearAllWishes() {
-  if (!await confirmAction('Delete ALL wishes permanently? This cannot be undone!')) return;
+  if (!await confirmAction('Delete ALL wishes permanently?')) return;
   try {
     const res = await fetch(`${API}/api/wishes`, { method:'DELETE', headers: adminHeaders() });
     if (!res.ok) throw new Error('Status: ' + res.status);
@@ -215,7 +230,6 @@ window.submitAnon = async function() {
   } catch(e) { showToast('❌ Failed to send: ' + e.message, 'error'); }
 };
 
-// Guard the anonMsg listener — element exists in hidden DOM so this is safe
 const _anonMsgEl = document.getElementById('anonMsg');
 if (_anonMsgEl) {
   _anonMsgEl.addEventListener('input', function() {
@@ -278,7 +292,6 @@ async function loadTopAnonHome() {
   } catch(e) {}
 }
 
-// Admin: load anon with delete buttons
 async function loadAdminAnon() {
   setLoading('adminAnonList', 'Loading anonymous messages...');
   try {
@@ -320,7 +333,7 @@ window.deleteAnon = async function(id) {
   if (!await confirmAction('Delete this anonymous message?')) return;
   try {
     const res = await fetch(`${API}/api/anon/${id}`, { method:'DELETE', headers: adminHeaders() });
-    if (!res.ok) throw new Error('Status: ' + res.status + ' — check ADMIN_PASSWORD in .env');
+    if (!res.ok) throw new Error('Status: ' + res.status);
     document.getElementById('anon-' + id)?.remove();
     showToast('🗑️ Message deleted', 'success');
     loadAnon(); loadTopAnonHome();
@@ -386,49 +399,41 @@ function renderQuestion() {
   }
 }
 
-window.nextQuestion = function() {
+window.quizNext = function() {
   const q = QUIZ[quizIdx];
   if (q.opts === null) {
     const ans = document.getElementById('qqTextAns').value.trim().toLowerCase();
-    if (ans === q.ans.toLowerCase()) quizScore++;
+    if (ans === String(q.ans).toLowerCase()) quizScore++;
   } else {
-    if (selectedOpt === null) { showToast('⚠️ Please pick an answer'); return; }
     if (selectedOpt === q.ans) quizScore++;
   }
   quizIdx++;
-  if (quizIdx < QUIZ.length) { renderQuestion(); } else { finishQuiz(); }
+  if (quizIdx < QUIZ.length) { renderQuestion(); }
+  else { showQuizResult(); }
 };
 
-async function finishQuiz() {
+async function showQuizResult() {
   document.getElementById('quizGame').classList.add('hidden');
   document.getElementById('quizResult').classList.remove('hidden');
+  const pct = Math.round((quizScore / QUIZ.length) * 100);
   document.getElementById('resultScore').textContent = quizScore;
-
-  let emoji='😅', msg='';
-  if      (quizScore<=3) { emoji='😂'; msg="Bro, do you even know Imayan? 😂"; }
-  else if (quizScore<=5) { emoji='🤔'; msg="Not bad! You know him a little... or just lucky 😏"; }
-  else if (quizScore<=7) { emoji='😎'; msg="Pretty good! You hang around Imayan a lot!"; }
-  else if (quizScore<=9) { emoji='🏅'; msg="Wow! You really know Imayan well! 🎉"; }
-  else                    { emoji='🏆'; msg="PERFECT SCORE! Imayan's #1 fan! 👑"; }
-  document.getElementById('resultEmoji').textContent = emoji;
-  document.getElementById('resultMsg').textContent   = msg;
-
+  document.getElementById('resultTotal').textContent = '/' + QUIZ.length;
+  const msgs = ['Keep learning about Imayan! 📚', 'Not bad! 😊', 'Pretty good! 🎉', 'Wow, you know Imayan well! 🌟', 'Perfect score! You are Imayan\'s biggest fan! 🏆'];
+  const idx  = pct < 20 ? 0 : pct < 40 ? 1 : pct < 60 ? 2 : pct < 80 ? 3 : 4;
+  document.getElementById('resultMsg').textContent = msgs[idx];
   try {
     await fetch(`${API}/api/quiz`, {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ name:quizName, roll:quizRoll, score:quizScore, total:QUIZ.length })
+      body: JSON.stringify({ name: quizName, roll: quizRoll, score: quizScore, total: QUIZ.length })
     });
-    loadChampion(); loadLeaderboardPreview();
+    loadLeaderboardPreview(); loadChampion();
   } catch(e) { console.error(e); }
 }
 
-window.resetQuiz = function() {
+window.retryQuiz = function() {
+  quizIdx=0; quizScore=0; selectedOpt=null;
   document.getElementById('quizResult').classList.add('hidden');
-  document.getElementById('quizGame').classList.add('hidden');
   document.getElementById('quizEntry').classList.remove('hidden');
-  document.getElementById('quizName').value='';
-  document.getElementById('quizRoll').value='';
-  loadLeaderboardPreview();
 };
 
 async function loadLeaderboardPreview() {
@@ -437,17 +442,13 @@ async function loadLeaderboardPreview() {
     if (!res.ok) return;
     const data = await res.json();
     const el   = document.getElementById('leaderPreview');
-    if (!data.length) { el.innerHTML=''; return; }
-    const best = new Map();
-    data.forEach(d => { const k=d.name.toLowerCase(); if (!best.has(k)||best.get(k).score<d.score) best.set(k,d); });
-    const sorted = [...best.values()].sort((a,b)=>b.score-a.score).slice(0,3);
-    const medals = ['🥇','🥈','🥉'];
-    el.innerHTML = '<h5>🏆 Top Scorers</h5>' + sorted.map((d,i)=>`
-      <div class="leader-item">
-        <span class="leader-rank">${medals[i]||'⭐'}</span>
-        <span class="leader-name">${escHtml(d.name)}</span>
-        <span class="leader-score">${d.score}/10</span>
-      </div>`).join('');
+    if (!el) return;
+    if (!data.length) { el.innerHTML = '<p class="empty-hint" style="font-size:.78rem">No scores yet — be the first!</p>'; return; }
+    const top = data.slice(0, 5);
+    const medals = ['🥇','🥈','🥉','4️⃣','5️⃣'];
+    el.innerHTML = '<h5>🏆 Leaderboard</h5>' + top.map((d,i) =>
+      `<div class="leader-item"><span class="leader-rank">${medals[i]}</span><span class="leader-name">${escHtml(d.name)}</span><span class="leader-score">${d.score}/${d.total}</span></div>`
+    ).join('');
   } catch(e) {}
 }
 
@@ -458,7 +459,7 @@ async function loadChampion() {
     const data = await res.json();
     if (!data.length) return;
     const best = new Map();
-    data.forEach(d => { const k=d.name.toLowerCase(); if (!best.has(k)||best.get(k).score<d.score) best.set(k,d); });
+    data.forEach(d => { if (!best.has(d.name) || best.get(d.name).score < d.score) best.set(d.name, d); });
     const champion = [...best.values()].sort((a,b)=>b.score-a.score)[0];
     if (!champion) return;
     document.getElementById('qcName').textContent  = champion.name;
@@ -467,7 +468,6 @@ async function loadChampion() {
   } catch(e) {}
 }
 
-// Admin: quiz leaderboard with delete
 async function loadAdminQuiz() {
   setLoading('adminQuizList', 'Loading quiz scores...');
   try {
@@ -515,7 +515,7 @@ window.deleteQuizEntry = async function(id) {
 };
 
 async function clearAllQuiz() {
-  if (!await confirmAction('Reset the ENTIRE quiz leaderboard? This cannot be undone!')) return;
+  if (!await confirmAction('Reset the ENTIRE quiz leaderboard?')) return;
   try {
     const res = await fetch(`${API}/api/quiz`, { method:'DELETE', headers: adminHeaders() });
     if (!res.ok) throw new Error('Status: ' + res.status);
@@ -527,26 +527,42 @@ async function clearAllQuiz() {
 
 // ══════════════════════════════════════════════════════
 //  GALLERY
+//  ✅ Uses FileReader → base64 → JSON → MongoDB
+//     Same exact pattern as portfolio's uploadProfileImage()
 // ══════════════════════════════════════════════════════
 
 window.uploadGalleryPhotos = async function() {
   const input = document.getElementById('galleryUpload');
   if (!input.files.length) { showToast('⚠️ Select at least one photo'); return; }
+
   showToast('⏳ Uploading photos...');
-  const fd = new FormData();
-  [...input.files].forEach(f => fd.append('photos', f));
+
   try {
+    // Convert all selected files to base64 (same as portfolio FileReader pattern)
+    const photos = [];
+    for (const file of input.files) {
+      const data = await fileToBase64(file);
+      photos.push({ data, filename: file.name });
+    }
+
+    // Send as JSON to MongoDB — no FormData, no multer, no disk!
     const res = await fetch(`${API}/api/uploads/gallery`, {
-      method:'POST',
-      headers: adminHeaders(), // DO NOT add Content-Type here — browser sets it with boundary
-      body: fd
+      method: 'POST',
+      headers: adminHeaders(),
+      body: JSON.stringify({ photos })
     });
-    if (!res.ok) throw new Error('Status: ' + res.status + ' — check ADMIN_PASSWORD in .env');
+
+    if (!res.ok) throw new Error('Status: ' + res.status);
+
     input.value = '';
     document.getElementById('galleryFileLabel').textContent = '📁 Choose photos (multiple ok)';
     showToast('✅ Photos uploaded!', 'success');
-    loadGallery(); loadAdminGallery();
-  } catch(e) { showToast('❌ Upload failed: ' + e.message, 'error'); console.error(e); }
+    loadGallery();
+    loadAdminGallery();
+  } catch(e) {
+    showToast('❌ Upload failed: ' + e.message, 'error');
+    console.error(e);
+  }
 };
 
 async function loadGallery() {
@@ -558,7 +574,7 @@ async function loadGallery() {
     if (!data.length) { grid.innerHTML = '<p class="empty-hint">Photos coming soon! 📸</p>'; return; }
     grid.innerHTML = '';
     data.forEach(item => {
-      const url = typeof item === 'string' ? item : item.url;
+      const url = item.url; // this is the base64 data URL — works directly as img src
       const div = document.createElement('div');
       div.className = 'gallery-item';
       div.onclick   = () => openLightbox(url);
@@ -583,13 +599,12 @@ async function loadAdminGallery() {
     }
 
     data.forEach(item => {
-      const url      = typeof item === 'string' ? item : item.url;
-      const filename = typeof item === 'string' ? item.split('/').pop() : item.filename;
       const wrap = document.createElement('div');
       wrap.className = 'admin-photo-wrap';
+      // item._id is the MongoDB _id used for deletion
       wrap.innerHTML = `
-        <img src="${url}" alt="photo" />
-        <button class="photo-del-btn" onclick="deleteGalleryPhoto('${filename}', this)" title="Delete photo">🗑️</button>`;
+        <img src="${item.url}" alt="photo" />
+        <button class="photo-del-btn" onclick="deleteGalleryPhoto('${item._id}', this)" title="Delete photo">🗑️</button>`;
       grid.appendChild(wrap);
     });
 
@@ -599,13 +614,14 @@ async function loadAdminGallery() {
     clearBtn.textContent = '🗑️ Delete All Gallery Photos';
     clearBtn.onclick = clearAllGallery;
     grid.appendChild(clearBtn);
-  } catch(e) { setError('adminGallery', 'Could not load gallery'); console.error(e); }
+  } catch(e) { setError('adminGallery', 'Could not load gallery: ' + e.message); console.error(e); }
 }
 
-window.deleteGalleryPhoto = async function(filename, btn) {
-  if (!await confirmAction(`Delete photo "${filename}"?`)) return;
+window.deleteGalleryPhoto = async function(id, btn) {
+  if (!await confirmAction('Delete this photo?')) return;
   try {
-    const res = await fetch(`${API}/api/uploads/gallery/${encodeURIComponent(filename)}`, {
+    // Delete by MongoDB _id
+    const res = await fetch(`${API}/api/uploads/gallery/${id}`, {
       method:'DELETE', headers: adminHeaders()
     });
     if (!res.ok) throw new Error('Status: ' + res.status);
@@ -627,27 +643,47 @@ async function clearAllGallery() {
 
 // ══════════════════════════════════════════════════════
 //  VIDEO
+//  ✅ Uses FileReader → base64 → JSON → MongoDB
+//  ⚠️  Videos are large — warn user, keep under ~40MB
 // ══════════════════════════════════════════════════════
 
 window.uploadVideo = async function() {
   const input  = document.getElementById('videoUpload');
   const status = document.getElementById('videoStatus');
   if (!input.files[0]) { showToast('⚠️ Select a video file'); return; }
-  status.textContent = '⏳ Uploading video (may take a while)...';
-  const fd = new FormData();
-  fd.append('video', input.files[0]);
+
+  const file = input.files[0];
+
+  // Warn if video is too large (base64 inflates size by ~33%)
+  const maxMB = 30;
+  if (file.size > maxMB * 1024 * 1024) {
+    showToast(`⚠️ Video too large! Max ${maxMB}MB. Please compress it first.`, 'error');
+    return;
+  }
+
+  status.textContent = '⏳ Converting video (may take a moment)...';
+
   try {
+    const data = await fileToBase64(file);
+    status.textContent = '⏳ Uploading to MongoDB...';
+
     const res = await fetch(`${API}/api/uploads/video`, {
-      method:'POST',
-      headers: adminHeaders(), // DO NOT add Content-Type — browser sets it with boundary
-      body: fd
+      method: 'POST',
+      headers: adminHeaders(),
+      body: JSON.stringify({ data, filename: file.name })
     });
-    if (!res.ok) throw new Error('Status: ' + res.status + ' — check ADMIN_PASSWORD in .env');
+
+    if (!res.ok) throw new Error('Status: ' + res.status);
+
     status.textContent = '✅ Video uploaded!';
     input.value = '';
     document.getElementById('videoFileLabel').textContent = '📁 Choose video file';
-    loadVideo(); loadAdminVideo();
-  } catch(e) { status.textContent = '❌ Upload failed: ' + e.message; console.error(e); }
+    loadVideo();
+    loadAdminVideo();
+  } catch(e) {
+    status.textContent = '❌ Upload failed: ' + e.message;
+    console.error(e);
+  }
 };
 
 async function loadVideo() {
@@ -664,7 +700,7 @@ async function loadVideo() {
       return;
     }
     if (ph) ph.style.display = 'none';
-    vid.src = data.url;
+    vid.src = data.url; // base64 data URL works directly as video src
     vid.classList.remove('hidden');
   } catch(e) {}
 }
@@ -682,7 +718,7 @@ async function loadAdminVideo() {
       container.innerHTML = `
         <div class="admin-video-item">
           <video src="${data.url}" controls style="width:100%;border-radius:8px;max-height:180px;background:#000;"></video>
-          <p class="meta" style="margin:.3rem 0;">${data.filename}</p>
+          <p class="meta" style="margin:.3rem 0;">${escHtml(data.filename || 'video')}</p>
           <button class="del-btn-wide" onclick="deleteVideo()">🗑️ Delete This Video</button>
         </div>`;
     } else {
@@ -704,6 +740,7 @@ window.deleteVideo = async function() {
 
 // ══════════════════════════════════════════════════════
 //  HERO PHOTOS
+//  ✅ Uses FileReader → base64 → JSON → MongoDB
 // ══════════════════════════════════════════════════════
 
 async function loadHeroPhotos() {
@@ -714,7 +751,7 @@ async function loadHeroPhotos() {
     [1,2].forEach(n => {
       if (data[n]) {
         const img = document.getElementById('heroImg' + n);
-        if (img) img.src = data[n].url;
+        if (img) img.src = data[n].url; // base64 data URL as src
       }
     });
   } catch(e) {}
@@ -724,24 +761,35 @@ window.uploadHeroPhoto = async function(num) {
   const input  = document.getElementById('heroUpload' + num);
   const status = document.getElementById('heroStatus');
   if (!input.files[0]) { showToast('⚠️ Select a photo'); return; }
+
   status.textContent = '⏳ Uploading photo ' + num + '...';
-  const fd = new FormData();
-  fd.append('photo', input.files[0]);
+
   try {
-    const res  = await fetch(`${API}/api/uploads/hero/${num}`, {
-      method:'POST',
-      headers: adminHeaders(), // DO NOT add Content-Type — browser sets it with boundary
-      body: fd
+    // FileReader → base64 (same as portfolio uploadProfileImage)
+    const data = await fileToBase64(input.files[0]);
+
+    const res = await fetch(`${API}/api/uploads/hero/${num}`, {
+      method: 'POST',
+      headers: adminHeaders(),
+      body: JSON.stringify({ data, filename: input.files[0].name })
     });
-    if (!res.ok) throw new Error('Status: ' + res.status + ' — check ADMIN_PASSWORD in .env');
-    const data = await res.json();
+
+    if (!res.ok) throw new Error('Status: ' + res.status);
+
+    const result = await res.json();
     status.textContent = `✅ Photo ${num} updated!`;
     input.value = '';
     document.getElementById('heroFileLabel' + num).textContent = '📁 Choose new photo';
+
+    // Update hero image on main page
     const img = document.getElementById('heroImg' + num);
-    if (img) img.src = data.url;
+    if (img) img.src = result.url;
+
     loadAdminHero();
-  } catch(e) { status.textContent = '❌ Upload failed: ' + e.message; console.error(e); }
+  } catch(e) {
+    status.textContent = '❌ Upload failed: ' + e.message;
+    console.error(e);
+  }
 };
 
 window.deleteHeroPhoto = async function(num) {
@@ -767,7 +815,7 @@ async function loadAdminHero() {
       const delBtn    = document.getElementById('heroDelBtn' + n);
       if (!previewEl) return;
       if (data[n]) {
-        previewEl.src = data[n].url;
+        previewEl.src = data[n].url; // base64 data URL
         previewEl.style.display = 'block';
         if (delBtn) delBtn.style.display = 'inline-flex';
       } else {
@@ -795,7 +843,6 @@ window.adminLogin = function() {
   if (document.getElementById('adminPass').value === ADMIN_PASSWORD) {
     document.getElementById('adminLogin').classList.add('hidden');
     document.getElementById('adminPanel').classList.remove('hidden');
-    // Load all admin data
     loadAdminWishes();
     loadAdminAnon();
     loadAdminGallery();
@@ -813,7 +860,6 @@ window.switchAdminTab = function(name, el) {
   document.querySelectorAll('.atab').forEach(t => t.classList.remove('active'));
   document.getElementById(name).classList.add('active');
   el.classList.add('active');
-  // Reload content when tab is switched
   if (name==='aVideo')  loadAdminVideo();
   if (name==='aHero')   loadAdminHero();
   if (name==='aPhotos') loadAdminGallery();
@@ -834,6 +880,3 @@ window.closeLightbox = function(e) {
   if (e) e.stopPropagation();
   document.getElementById('lightbox').classList.add('hidden');
 };
-
-// ══ INIT — called after enterSite(), not on raw page load ═════
-// (loadPublicWishes, loadAnon etc. are called inside enterSite())

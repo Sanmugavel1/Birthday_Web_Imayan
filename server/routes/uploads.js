@@ -1,162 +1,178 @@
 // server/routes/uploads.js
-const express = require('express');
-const router  = express.Router();
-const multer  = require('multer');
-const path    = require('path');
-const fs      = require('fs');
+// ══════════════════════════════════════════════════════════════
+//  UPLOADS — Base64 storage in MongoDB (NO disk, NO multer)
+//  Same pattern as portfolio's profileImage storage.
+//  Works perfectly on Render free tier — no paid disk needed.
+// ══════════════════════════════════════════════════════════════
 
-// ── Storage helpers ──────────────────────────
-function makeStorage(folder) {
-  return multer.diskStorage({
-    destination: (req, file, cb) => {
-      const dir = path.join(__dirname, '../uploads', folder);
-      fs.mkdirSync(dir, { recursive: true });
-      cb(null, dir);
-    },
-    filename: (req, file, cb) => {
-      // sanitise original name
-      const safe = file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
-      cb(null, Date.now() + '_' + safe);
-    }
-  });
-}
+const express  = require('express');
+const router   = express.Router();
+const mongoose = require('mongoose');
 
-const galleryUpload = multer({ storage: makeStorage('gallery'), limits: { fileSize: 10 * 1024 * 1024 } });
-const videoUpload   = multer({ storage: makeStorage('video'),   limits: { fileSize: 500 * 1024 * 1024 } });
-const heroUpload    = multer({ storage: makeStorage('hero'),    limits: { fileSize: 10 * 1024 * 1024 } });
-
-// ── Auth middleware ───────────────────────────
+// ── Auth middleware ───────────────────────────────────────────
 function adminOnly(req, res, next) {
   if (req.headers['x-admin-pass'] === process.env.ADMIN_PASSWORD) return next();
   res.status(403).json({ error: 'Forbidden' });
 }
 
-// ═══════════════════════════════════════════
-//  GALLERY
-// ═══════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+//  MONGOOSE SCHEMAS
+// ══════════════════════════════════════════════════════════════
+
+// Gallery — array of base64 image strings with IDs
+const GallerySchema = new mongoose.Schema({
+  data:      { type: String, required: true }, // base64 data URL  e.g. "data:image/jpeg;base64,..."
+  filename:  { type: String, default: '' },
+  createdAt: { type: Date, default: Date.now }
+});
+const Gallery = mongoose.model('Gallery', GallerySchema);
+
+// Video — single document (we overwrite it each time)
+const VideoSchema = new mongoose.Schema({
+  data:      { type: String, required: true }, // base64 data URL
+  filename:  { type: String, default: '' },
+  createdAt: { type: Date, default: Date.now }
+});
+const Video = mongoose.model('Video', VideoSchema);
+
+// HeroPhoto — slot 1 and slot 2 stored separately
+const HeroSchema = new mongoose.Schema({
+  slot:      { type: Number, required: true, unique: true }, // 1 or 2
+  data:      { type: String, required: true }, // base64 data URL
+  filename:  { type: String, default: '' },
+  createdAt: { type: Date, default: Date.now }
+});
+const Hero = mongoose.model('Hero', HeroSchema);
+
+// ══════════════════════════════════════════════════════════════
+//  GALLERY ROUTES
+// ══════════════════════════════════════════════════════════════
 
 // GET all gallery photos
-router.get('/gallery', (req, res) => {
-  const dir = path.join(__dirname, '../uploads/gallery');
-  if (!fs.existsSync(dir)) return res.json([]);
-  const files = fs.readdirSync(dir)
-    .filter(f => /\.(jpg|jpeg|png|gif|webp)$/i.test(f))
-    .sort()
-    .map(f => ({ filename: f, url: `/uploads/gallery/${f}` }));
-  res.json(files);
+router.get('/gallery', async (req, res) => {
+  try {
+    const photos = await Gallery.find().sort({ createdAt: 1 });
+    // Return id + base64 data URL (frontend uses data directly as img src)
+    res.json(photos.map(p => ({
+      _id:      p._id,
+      filename: p.filename,
+      url:      p.data   // base64 data URL acts as the "url"
+    })));
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// POST upload gallery photos (admin)
-router.post('/gallery', adminOnly, galleryUpload.array('photos', 20), (req, res) => {
-  const files = req.files.map(f => ({ filename: f.filename, url: `/uploads/gallery/${f.filename}` }));
-  res.json(files);
+// POST upload gallery photos (admin) — receives base64 array
+// Frontend sends: { photos: [ { data: "data:image/jpeg;base64,...", filename: "pic.jpg" }, ... ] }
+router.post('/gallery', adminOnly, async (req, res) => {
+  try {
+    const { photos } = req.body;
+    if (!photos || !Array.isArray(photos) || !photos.length) {
+      return res.status(400).json({ error: 'No photos provided' });
+    }
+    const saved = [];
+    for (const photo of photos) {
+      if (!photo.data) continue;
+      const doc = await Gallery.create({ data: photo.data, filename: photo.filename || '' });
+      saved.push({ _id: doc._id, filename: doc.filename, url: doc.data });
+    }
+    res.json(saved);
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 // DELETE single gallery photo (admin)
-router.delete('/gallery/:filename', adminOnly, (req, res) => {
-  const filePath = path.join(__dirname, '../uploads/gallery', req.params.filename);
-  if (!fs.existsSync(filePath)) return res.status(404).json({ error: 'File not found' });
-  fs.unlinkSync(filePath);
-  res.json({ deleted: req.params.filename });
+router.delete('/gallery/:id', adminOnly, async (req, res) => {
+  try {
+    const deleted = await Gallery.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ error: 'Not found' });
+    res.json({ deleted: req.params.id });
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 // DELETE all gallery photos (admin)
-router.delete('/gallery', adminOnly, (req, res) => {
-  const dir = path.join(__dirname, '../uploads/gallery');
-  if (fs.existsSync(dir)) {
-    fs.readdirSync(dir).forEach(f => fs.unlinkSync(path.join(dir, f)));
-  }
-  res.json({ cleared: true });
+router.delete('/gallery', adminOnly, async (req, res) => {
+  try {
+    await Gallery.deleteMany({});
+    res.json({ cleared: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ═══════════════════════════════════════════
-//  VIDEO
-// ═══════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+//  VIDEO ROUTES
+// ══════════════════════════════════════════════════════════════
 
 // GET current video
-router.get('/video', (req, res) => {
-  const dir = path.join(__dirname, '../uploads/video');
-  if (!fs.existsSync(dir)) return res.json(null);
-  const files = fs.readdirSync(dir).filter(f => /\.(mp4|mov|webm|avi|mkv)$/i.test(f));
-  if (!files.length) return res.json(null);
-  // Return the most recent
-  const latest = files.sort().pop();
-  res.json({ filename: latest, url: `/uploads/video/${latest}` });
+router.get('/video', async (req, res) => {
+  try {
+    const video = await Video.findOne().sort({ createdAt: -1 });
+    if (!video) return res.json(null);
+    res.json({ _id: video._id, filename: video.filename, url: video.data });
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 // POST upload video (admin)
-router.post('/video', adminOnly, videoUpload.single('video'), (req, res) => {
-  // Delete old videos to keep only the latest
-  const dir = path.join(__dirname, '../uploads/video');
-  fs.readdirSync(dir)
-    .filter(f => f !== req.file.filename)
-    .forEach(f => {
-      try { fs.unlinkSync(path.join(dir, f)); } catch {}
-    });
-  res.json({ filename: req.file.filename, url: `/uploads/video/${req.file.filename}` });
+// Frontend sends: { data: "data:video/mp4;base64,...", filename: "birthday.mp4" }
+router.post('/video', adminOnly, async (req, res) => {
+  try {
+    const { data, filename } = req.body;
+    if (!data) return res.status(400).json({ error: 'No video data provided' });
+
+    // Delete old video(s) first — keep only latest
+    await Video.deleteMany({});
+    const video = await Video.create({ data, filename: filename || '' });
+    res.json({ _id: video._id, filename: video.filename, url: video.data });
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 // DELETE video (admin)
-router.delete('/video', adminOnly, (req, res) => {
-  const dir = path.join(__dirname, '../uploads/video');
-  if (fs.existsSync(dir)) {
-    fs.readdirSync(dir).forEach(f => {
-      try { fs.unlinkSync(path.join(dir, f)); } catch {}
-    });
-  }
-  res.json({ deleted: true });
+router.delete('/video', adminOnly, async (req, res) => {
+  try {
+    await Video.deleteMany({});
+    res.json({ deleted: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ═══════════════════════════════════════════
-//  HERO PHOTOS
-// ═══════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+//  HERO PHOTO ROUTES
+// ══════════════════════════════════════════════════════════════
 
 // GET both hero photos
-router.get('/hero', (req, res) => {
-  const dir = path.join(__dirname, '../uploads/hero');
-  if (!fs.existsSync(dir)) return res.json({});
-  const files = fs.readdirSync(dir);
-  const result = {};
-  [1, 2].forEach(n => {
-    // Strictly match files named with _photoN (e.g. 1234567_photo1.jpg)
-    const match = files
-      .filter(f => f.includes(`_photo${n}.`) || f.includes(`_photo${n}_`))
-      .sort()
-      .pop();
-    if (match) result[n] = { filename: match, url: `/uploads/hero/${match}` };
-  });
-  res.json(result);
+router.get('/hero', async (req, res) => {
+  try {
+    const heroes = await Hero.find({ slot: { $in: [1, 2] } });
+    const result = {};
+    heroes.forEach(h => {
+      result[h.slot] = { _id: h._id, filename: h.filename, url: h.data };
+    });
+    res.json(result);
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 // POST upload hero photo (admin)
-router.post('/hero/:num', adminOnly, heroUpload.single('photo'), (req, res) => {
-  const num = req.params.num;
-  // Rename file to include slot number for easy lookup
-  const dir      = path.join(__dirname, '../uploads/hero');
-  const oldPath  = req.file.path;
-  const ext      = path.extname(req.file.originalname) || '.jpg';
-  const newName  = `${Date.now()}_photo${num}${ext}`;
-  const newPath  = path.join(dir, newName);
+// Frontend sends: { data: "data:image/jpeg;base64,...", filename: "hero1.jpg" }
+router.post('/hero/:num', adminOnly, async (req, res) => {
+  try {
+    const num = parseInt(req.params.num);
+    if (num !== 1 && num !== 2) return res.status(400).json({ error: 'Slot must be 1 or 2' });
+    const { data, filename } = req.body;
+    if (!data) return res.status(400).json({ error: 'No image data provided' });
 
-  // Delete old hero photo for this slot
-  fs.readdirSync(dir)
-    .filter(f => f.includes(`_photo${num}`))
-    .forEach(f => { try { fs.unlinkSync(path.join(dir, f)); } catch {} });
-
-  fs.renameSync(oldPath, newPath);
-  res.json({ num, filename: newName, url: `/uploads/hero/${newName}` });
+    // Upsert — replace existing slot or create new
+    const hero = await Hero.findOneAndUpdate(
+      { slot: num },
+      { data, filename: filename || '', createdAt: new Date() },
+      { upsert: true, new: true }
+    );
+    res.json({ num, _id: hero._id, filename: hero.filename, url: hero.data });
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 // DELETE hero photo slot (admin)
-router.delete('/hero/:num', adminOnly, (req, res) => {
-  const num = req.params.num;
-  const dir = path.join(__dirname, '../uploads/hero');
-  if (fs.existsSync(dir)) {
-    fs.readdirSync(dir)
-      .filter(f => f.includes(`_photo${num}`))
-      .forEach(f => { try { fs.unlinkSync(path.join(dir, f)); } catch {} });
-  }
-  res.json({ deleted: num });
+router.delete('/hero/:num', adminOnly, async (req, res) => {
+  try {
+    const num = parseInt(req.params.num);
+    await Hero.deleteOne({ slot: num });
+    res.json({ deleted: num });
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 module.exports = router;

@@ -10,20 +10,23 @@ if (!process.env.MONGO_URI) {
   process.exit(1);
 }
 if (!process.env.ADMIN_PASSWORD) {
-  console.error('❌ ADMIN_PASSWORD is not set in your .env file! Admin actions will all return 403.');
+  console.error('❌ ADMIN_PASSWORD is not set in your .env file!');
   process.exit(1);
 }
 
 const app = express();
 
 app.use(cors());
-app.use(express.json());
+
+// ── IMPORTANT: increase limit to 50mb to handle base64 images/videos ──
+// Same as your portfolio server.js line 13: express.json({ limit: '50mb' })
+app.use(express.json({ limit: '50mb' }));
 
 // Serve frontend
 app.use(express.static(path.join(__dirname, '../public')));
 
-// Serve uploads
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// NOTE: No more app.use('/uploads', express.static(...))
+// Files are now stored in MongoDB and served as base64 data URLs — no disk needed!
 
 // Routes
 app.use('/api/wishes',  require('./routes/wishes'));
@@ -52,6 +55,7 @@ mongoose.connect(process.env.MONGO_URI)
 
   app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`💾 Images/Videos stored in MongoDB as Base64 — no disk needed!`);
   });
 })
 .catch(err => {
