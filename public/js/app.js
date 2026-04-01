@@ -426,7 +426,7 @@ async function showQuizResult() {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ name: quizName, roll: quizRoll, score: quizScore, total: QUIZ.length })
     });
-    loadLeaderboardPreview(); loadChampion();
+    loadLeaderboardPreview(); loadChampion(); if(document.getElementById("adminPanel") && !document.getElementById("adminPanel").classList.contains("hidden")) loadAdminQuiz();
   } catch(e) { console.error(e); }
 }
 
