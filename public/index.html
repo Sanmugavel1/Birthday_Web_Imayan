@@ -3,24 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <title>Happy Birthday Imayan 🎂</title>
+  <title>Happy Birthday Nirmal 🎂</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500&family=Dancing+Script:wght@700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Syne:wght@400;600;700;800&family=Caveat:wght@600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
 
-<!-- ══════════════════ SPLASH SCREEN ══════════════════ -->
+<!-- ══════════ SPLASH ══════════ -->
 <div id="splash">
   <canvas id="confettiCanvas"></canvas>
+  <div class="splash-bg-rings">
+    <div class="ring r1"></div>
+    <div class="ring r2"></div>
+    <div class="ring r3"></div>
+  </div>
   <div class="splash-inner">
-    <div class="balloons">
-      <span class="b b1">🎈</span><span class="b b2">🎈</span>
-      <span class="b b3">🎈</span><span class="b b4">🎈</span><span class="b b5">🎈</span>
-    </div>
-    <p class="splash-sub">✨ A special day for a special soul ✨</p>
-    <h1 class="splash-name">Imayan</h1>
-    <p class="splash-date">April 2, 2026</p>
+    <div class="splash-tag">🎂 April 7, 2026</div>
+    <p class="splash-sub">The universe is celebrating because</p>
+    <h1 class="splash-name">Nirmal</h1>
+    <p class="splash-tagline">…finally got older 🎉</p>
     <div class="cake-wrap">
       <div class="cake">
         <div class="candle"><div class="flame"></div></div>
@@ -32,243 +34,313 @@
       </div>
     </div>
     <button class="enter-btn" onclick="enterSite()">
-      <span>Enter &amp; Celebrate</span>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      Let's Go! 🚀
     </button>
   </div>
 </div>
 
-<!-- ══════════════════ MAIN SITE ══════════════════ -->
+<!-- ══════════ MAIN SITE ══════════ -->
 <div id="mainSite" class="hidden">
 
+  <!-- Floating header pill -->
   <header class="topbar">
-    <div class="topbar-logo">🎂 Imayan's Day</div>
-    <button class="admin-btn" onclick="openAdmin()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+    <div class="topbar-left">
+      <span class="topbar-dot"></span>
+      <span class="topbar-logo">Nirmal's Day</span>
+    </div>
+    <button class="admin-btn" onclick="openAdmin()" aria-label="Admin">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
     </button>
   </header>
 
-  <nav class="tabs">
-    <button class="tab active" onclick="switchTab('home',this)">🏠 Home</button>
-    <button class="tab" onclick="switchTab('wishes',this)">💌 Wishes</button>
-    <button class="tab" onclick="switchTab('anon',this)">🕵️ Anon</button>
-    <button class="tab" onclick="switchTab('quiz',this)">🧠 Quiz</button>
-    <button class="tab" onclick="switchTab('gallery',this)">📸 Gallery</button>
-    <button class="tab" onclick="switchTab('video',this)">🎬 Video</button>
-  </nav>
+  <!-- ══ TAB PANELS ══ -->
+  <main class="main-content">
 
-  <!-- ══ HOME TAB ══ -->
-  <section id="tab-home" class="tab-content active">
-    <div class="hero-section">
+    <!-- HOME -->
+    <section id="tab-home" class="tab-content active">
 
-      <div class="hero-photos">
-        <div class="photo-slot" onclick="openLightbox('assets/photo1.jpeg')">
-          <img src="assets/photo1.jpeg" class="hero-img" alt="Imayan" id="heroImg1" />
+      <!-- Big name hero -->
+      <div class="home-hero">
+        <div class="hero-marquee-wrap">
+          <div class="hero-marquee">
+            <span>HAPPY BIRTHDAY</span><span class="mx-dot">✦</span>
+            <span>HAPPY BIRTHDAY</span><span class="mx-dot">✦</span>
+            <span>HAPPY BIRTHDAY</span><span class="mx-dot">✦</span>
+          </div>
         </div>
-        <div class="photo-slot" onclick="openLightbox('assets/photo2.jpeg')">
-          <img src="assets/photo2.jpeg" class="hero-img" alt="Imayan" id="heroImg2" />
+
+        <div class="hero-name-block">
+          <div class="hero-photos-row">
+            <div class="photo-pill left-pill" onclick="openLightbox('assets/photo1.jpeg')">
+              <img src="assets/photo1.jpeg" class="hero-img" alt="Nirmal" id="heroImg1" />
+              <div class="pill-shine"></div>
+            </div>
+            <div class="hero-center-text">
+              <p class="hct-label">The one &amp; only</p>
+              <h2 class="hct-name">Nirmal</h2>
+              <p class="hct-sub">Est. 2003 🎂</p>
+            </div>
+            <div class="photo-pill right-pill" onclick="openLightbox('assets/photo2.jpeg')">
+              <img src="assets/photo2.jpeg" class="hero-img" alt="Nirmal" id="heroImg2" />
+              <div class="pill-shine"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="emoji-ticker">🎉&nbsp;&nbsp;🎈&nbsp;&nbsp;🎂&nbsp;&nbsp;🎁&nbsp;&nbsp;✨&nbsp;&nbsp;🥳&nbsp;&nbsp;💫&nbsp;&nbsp;🎊</div>
+      </div>
+
+      <!-- Countdown -->
+      <div class="section-block">
+        <div class="block-label">⏰ Countdown</div>
+        <div class="countdown-card">
+          <div class="cd-grid">
+            <div class="cd-item"><span id="cdDays">0</span><label>Days</label></div>
+            <div class="cd-sep">:</div>
+            <div class="cd-item"><span id="cdHours">00</span><label>Hours</label></div>
+            <div class="cd-sep">:</div>
+            <div class="cd-item"><span id="cdMins">00</span><label>Mins</label></div>
+            <div class="cd-sep">:</div>
+            <div class="cd-item"><span id="cdSecs">00</span><label>Secs</label></div>
+          </div>
+          <p id="birthdayMsg" class="bd-msg hidden">🎂 It's his birthday and he still doesn't have a girlfriend. Celebrate anyway! 🎉</p>
         </div>
       </div>
 
-      <div class="hero-text">
-        <p class="hero-eyebrow">Wishing a very</p>
-        <h2 class="hero-title">Happy<br/><em>Birthday</em></h2>
-        <p class="hero-name-big">Imayan!</p>
-        <div class="confetti-strip">🎉🎊🥳🎈🎁🎂</div>
-      </div>
-
-      <!-- Quiz Champion Banner -->
+      <!-- Quiz Champion -->
       <div class="quiz-champion-card" id="quizChampion" style="display:none;">
-        <div class="qc-crown">👑</div>
-        <p class="qc-label">Imayan's #1 Well-Knower</p>
-        <p class="qc-name" id="qcName">—</p>
-        <p class="qc-score" id="qcScore"></p>
-        <p class="qc-quote">"Knows Imayan better than Imayan knows himself 😂"</p>
+        <div class="qc-left">
+          <span class="qc-crown">👑</span>
+          <div>
+            <p class="qc-label">NIRMAL'S #1 WELL-KNOWER</p>
+            <p class="qc-name" id="qcName">—</p>
+            <p class="qc-score" id="qcScore"></p>
+          </div>
+        </div>
+        <p class="qc-quote">"Knows him better than his mom 😂"</p>
       </div>
 
-      <!-- Top Liked Anonymous Message -->
+      <!-- Top Anon -->
       <div class="top-anon-card" id="topAnonCard" style="display:none;">
-        <div class="top-anon-header"><span>🔥</span><p>Most Loved Anonymous Message</p></div>
+        <div class="top-anon-header"><span>🔥</span><p>Most Loved Secret Message</p></div>
         <p class="top-anon-msg" id="topAnonMsg"></p>
         <p class="top-anon-likes" id="topAnonLikes"></p>
       </div>
 
-      <div class="countdown-card">
-        <p class="cd-label">🎂 Birthday Countdown</p>
-        <div class="cd-grid">
-          <div class="cd-item"><span id="cdDays">0</span><label>Days</label></div>
-          <div class="cd-item"><span id="cdHours">0</span><label>Hours</label></div>
-          <div class="cd-item"><span id="cdMins">0</span><label>Mins</label></div>
-          <div class="cd-item"><span id="cdSecs">0</span><label>Secs</label></div>
-        </div>
-        <p id="birthdayMsg" class="bd-msg hidden">🎂 Today is the big day! Happy Birthday Imayan! 🎉</p>
-      </div>
-
+      <!-- Funny Quote -->
       <div class="quote-card">
-        <p class="quote-text">"May your birthday be the start of a year filled with good luck, good health, and much happiness."</p>
-        <p class="quote-from">— With love, your friends 💛</p>
+        <div class="quote-icon">💬</div>
+        <p class="quote-text">"Age is just a number. In Nirmal's case, it's a number that keeps going up whether he likes it or not."</p>
+        <p class="quote-from">— Ancient wisdom, probably 🏛️</p>
       </div>
-    </div>
-  </section>
 
-  <!-- ══ WISHES TAB ══ -->
-  <section id="tab-wishes" class="tab-content">
-    <div class="section-header">
-      <h2>Birthday Wishes</h2>
-      <p>Leave your wish for Imayan<br/><span class="privacy-note">🔒 Only Imayan can see your wish</span></p>
-    </div>
-    <div class="wish-form card">
-      <input type="text" id="wishName" placeholder="Your Name" maxlength="40" />
-      <input type="text" id="wishRoll" placeholder="Your Roll No" maxlength="20" />
-      <input type="text" id="wishTreat" placeholder="Treat you want from Imayan 😄" maxlength="80" />
-      <textarea id="wishMsg" placeholder="Your birthday wish..." rows="4" maxlength="400"></textarea>
-      <button class="submit-btn" onclick="submitWish()"><span>Send Wish 💌</span></button>
-    </div>
-    <div class="wishes-list" id="wishesList"><p class="empty-hint">Be the first to send a wish! 🌟</p></div>
-  </section>
+    </section>
 
-  <!-- ══ ANONYMOUS TAB ══ -->
-  <section id="tab-anon" class="tab-content">
-    <div class="section-header">
-      <h2>Anonymous Feelings</h2>
-      <p>Share what's in your heart — <strong>no name needed</strong></p>
-      <div class="privacy-badge">
-        <span>🕵️</span>
-        <p>No one can see you sent this — not even the admin sees your identity here</p>
+    <!-- WISHES -->
+    <section id="tab-wishes" class="tab-content">
+      <div class="page-header">
+        <h2 class="page-title">Drop a Wish 💌</h2>
+        <p class="page-sub">Leave Nirmal a message.<br/><span class="lock-chip">🔒 Only he can read these</span></p>
       </div>
-    </div>
-    <div class="wish-form card">
-      <textarea id="anonMsg" placeholder="Say anything you've always wanted to tell Imayan... 💭" rows="5" maxlength="500"></textarea>
-      <p class="char-hint" id="anonChars">500 characters remaining</p>
-      <button class="submit-btn anon-btn" onclick="submitAnon()"><span>Send Anonymously 🕵️</span></button>
-    </div>
-    <div class="anon-list" id="anonList"><p class="empty-hint">No anonymous messages yet...</p></div>
-  </section>
-
-  <!-- ══ QUIZ TAB ══ -->
-  <section id="tab-quiz" class="tab-content">
-    <div class="section-header">
-      <h2>🧠 Know Imayan?</h2>
-      <p>Prove you know him better than anyone!</p>
-    </div>
-
-    <div id="quizEntry" class="card wish-form">
-      <div class="quiz-entry-hero">
-        <span class="quiz-entry-emoji">🎯</span>
-        <h3 class="quiz-entry-title">The Imayan Quiz</h3>
-        <p class="quiz-entry-sub">10 questions · Only your score shown · Top scorer featured on Home!</p>
-      </div>
-      <input type="text" id="quizName" placeholder="Your Name" maxlength="40" />
-      <input type="text" id="quizRoll" placeholder="Your Register No" maxlength="20" />
-      <button class="submit-btn quiz-start-btn" onclick="startQuiz()"><span>Start Quiz 🚀</span></button>
-      <div id="leaderPreview"></div>
-    </div>
-
-    <div id="quizGame" class="hidden">
-      <div class="quiz-progress-wrap">
-        <div class="qp-bar"><div class="qp-fill" id="qpFill" style="width:10%"></div></div>
-        <p class="qp-text" id="qpText">Question 1 of 10</p>
-      </div>
-      <div class="quiz-qcard card" id="quizQCard">
-        <p class="qq-num" id="qqNum">Q1</p>
-        <p class="qq-text" id="qqText"></p>
-        <div class="qq-options" id="qqOptions"></div>
-        <input type="text" id="qqTextAns" class="hidden qq-text-input" placeholder="Type your answer..." />
-        <button class="submit-btn quiz-next-btn hidden" id="quizNextBtn" onclick="quizNext()">Next →</button>
-      </div>
-    </div>
-
-    <div id="quizResult" class="hidden">
-      <div class="result-card card">
-        <div class="result-emoji" id="resultEmoji">🏆</div>
-        <h3 class="result-title">Quiz Complete!</h3>
-        <div class="result-score-ring">
-          <span id="resultScore">0</span><label id="resultTotal">/10</label>
+      <div class="form-card">
+        <div class="input-row">
+          <div class="input-group">
+            <label>Your Name</label>
+            <input type="text" id="wishName" placeholder="e.g. Kovaalan" maxlength="40" />
+          </div>
+          <div class="input-group">
+            <label>Roll No</label>
+            <input type="text" id="wishRoll" placeholder="e.g. 23ECE01" maxlength="20" />
+          </div>
         </div>
-        <p class="result-msg" id="resultMsg"></p>
-        <button class="submit-btn" style="margin-top:1.2rem;" onclick="retryQuiz()">Try Again 🔄</button>
+        <div class="input-group">
+          <label>Treat you want 😋</label>
+          <input type="text" id="wishTreat" placeholder="Be honest, he's paying" maxlength="80" />
+        </div>
+        <div class="input-group">
+          <label>Your Birthday Wish</label>
+          <textarea id="wishMsg" placeholder="Write something heartfelt… or roast him, your choice 😂" rows="4" maxlength="400"></textarea>
+        </div>
+        <button class="submit-btn" onclick="submitWish()">Send Wish 💌</button>
       </div>
-    </div>
-  </section>
+      <div class="wishes-list" id="wishesList"><p class="empty-hint">No wishes yet. Be the first! 🌟</p></div>
+    </section>
 
-  <!-- ══ GALLERY TAB ══ -->
-  <section id="tab-gallery" class="tab-content">
-    <div class="section-header"><h2>Cute Pics ✨</h2><p>Memories with Imayan 📸</p></div>
-    <div class="gallery-grid" id="galleryGrid"><p class="empty-hint">Photos coming soon! 📸</p></div>
-  </section>
+    <!-- ANON -->
+    <section id="tab-anon" class="tab-content">
+      <div class="page-header">
+        <h2 class="page-title">Speak Freely 🕵️</h2>
+        <p class="page-sub">Say what you REALLY think.<br/><strong>No name. No trace. Pure chaos.</strong></p>
+      </div>
+      <div class="anon-badge">
+        <span>🥷</span>
+        <p>100% anonymous — even the admin can't tell who sent it</p>
+      </div>
+      <div class="form-card">
+        <div class="input-group">
+          <label>Your Secret Message</label>
+          <textarea id="anonMsg" placeholder="Tell Nirmal something you've always kept inside… 💭" rows="5" maxlength="500"></textarea>
+        </div>
+        <p class="char-hint" id="anonChars">500 characters remaining</p>
+        <button class="submit-btn anon-btn" onclick="submitAnon()">Send Anonymously 🥷</button>
+      </div>
+      <div class="anon-list" id="anonList"><p class="empty-hint">No anonymous messages yet…</p></div>
+    </section>
 
-  <!-- ══ VIDEO TAB ══ -->
-  <section id="tab-video" class="tab-content">
-    <div class="section-header"><h2>Special Video 🎬</h2><p>A video for Imayan 🎉</p></div>
-    <div class="video-wrap" id="videoWrap">
-      <div class="video-placeholder"><span>🎬</span><p>Video coming soon!</p></div>
-      <video id="mainVideo" class="hidden" controls playsinline></video>
-    </div>
-  </section>
+    <!-- QUIZ -->
+    <section id="tab-quiz" class="tab-content">
+      <div class="page-header">
+        <h2 class="page-title">Know Nirmal? 🧠</h2>
+        <p class="page-sub">Prove it. Or embarrass yourself trying.</p>
+      </div>
+
+      <div id="quizEntry" class="form-card">
+        <div class="quiz-entry-hero">
+          <div class="quiz-badge-big">🎯</div>
+          <h3 class="quiz-entry-title">The Nirmal Quiz</h3>
+          <p class="quiz-entry-sub">10 questions · Top scorer gets bragging rights forever</p>
+        </div>
+        <div class="input-group">
+          <label>Your Name</label>
+          <input type="text" id="quizName" placeholder="Your Name" maxlength="40" />
+        </div>
+        <div class="input-group">
+          <label>Register No</label>
+          <input type="text" id="quizRoll" placeholder="Your Register No" maxlength="20" />
+        </div>
+        <button class="submit-btn" onclick="startQuiz()">Start Quiz 🚀</button>
+        <div id="leaderPreview"></div>
+      </div>
+
+      <div id="quizGame" class="hidden">
+        <div class="quiz-progress-wrap">
+          <div class="qp-bar"><div class="qp-fill" id="qpFill" style="width:10%"></div></div>
+          <p class="qp-text" id="qpText">Question 1 of 10</p>
+        </div>
+        <div class="quiz-qcard form-card" id="quizQCard">
+          <p class="qq-num" id="qqNum">Q1</p>
+          <p class="qq-text" id="qqText"></p>
+          <div class="qq-options" id="qqOptions"></div>
+          <input type="text" id="qqTextAns" class="hidden qq-text-input" placeholder="Type your answer..." />
+          <button class="submit-btn quiz-next-btn hidden" id="quizNextBtn" onclick="quizNext()">Next →</button>
+        </div>
+      </div>
+
+      <div id="quizResult" class="hidden">
+        <div class="result-card form-card">
+          <div class="result-emoji" id="resultEmoji">🏆</div>
+          <h3 class="result-title">Quiz Done!</h3>
+          <div class="result-score-ring">
+            <span id="resultScore">0</span><label id="resultTotal">/10</label>
+          </div>
+          <p class="result-msg" id="resultMsg"></p>
+          <button class="submit-btn" style="margin-top:1.2rem;" onclick="retryQuiz()">Try Again 🔄</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- GALLERY -->
+    <section id="tab-gallery" class="tab-content">
+      <div class="page-header">
+        <h2 class="page-title">Memories 📸</h2>
+        <p class="page-sub">Evidence that Nirmal actually goes outside</p>
+      </div>
+      <div class="gallery-grid" id="galleryGrid"><p class="empty-hint">Photos coming soon! 📸</p></div>
+    </section>
+
+    <!-- VIDEO -->
+    <section id="tab-video" class="tab-content">
+      <div class="page-header">
+        <h2 class="page-title">Special Video 🎬</h2>
+        <p class="page-sub">Sit back and cringe together 🎉</p>
+      </div>
+      <div class="video-wrap" id="videoWrap">
+        <div class="video-placeholder"><span>🎬</span><p>Video dropping soon!</p></div>
+        <video id="mainVideo" class="hidden" controls playsinline></video>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ══ BOTTOM NAV ══ -->
+  <nav class="bottom-nav">
+    <button class="bnav-btn active" onclick="switchTab('home',this)" data-tab="home">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      <span>Home</span>
+    </button>
+    <button class="bnav-btn" onclick="switchTab('wishes',this)" data-tab="wishes">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+      <span>Wishes</span>
+    </button>
+    <button class="bnav-btn" onclick="switchTab('anon',this)" data-tab="anon">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+      <span>Anon</span>
+    </button>
+    <button class="bnav-btn" onclick="switchTab('quiz',this)" data-tab="quiz">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z"/></svg>
+      <span>Quiz</span>
+    </button>
+    <button class="bnav-btn" onclick="switchTab('gallery',this)" data-tab="gallery">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+      <span>Gallery</span>
+    </button>
+    <button class="bnav-btn" onclick="switchTab('video',this)" data-tab="video">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+      <span>Video</span>
+    </button>
+  </nav>
 
 </div><!-- end mainSite -->
 
-<!-- ══════════════════ FOOTER ══════════════════ -->
+<!-- ══ FOOTER ══ -->
 <footer class="site-footer" id="siteFooter" style="display:none;">
-  <div class="footer-divider"></div>
   <div class="footer-inner">
-    <p class="footer-heart">Made with ❤️ for Imayan</p>
-    <p class="footer-heart">By DayScholars Gang...</p>
-    <div class="footer-stars">⭐ ⭐ ⭐</div>
-    <p class="footer-copy">© 2026 All Rights Reserved</p>
-    <p class="footer-name">@Sanmugavel B</p>
+    <p class="footer-heart">Made with ❤️ for Nirmal</p>
+    <p class="footer-sub">By DayScholars Gang</p>
+    <p class="footer-copy">© 2026 · @Sanmugavel B</p>
   </div>
 </footer>
 
-<!-- ══════════════════ ADMIN MODAL ══════════════════ -->
+<!-- ══ ADMIN MODAL ══ -->
 <div id="adminModal" class="modal-overlay hidden">
   <div class="modal-box">
     <button class="modal-close" onclick="closeAdmin()">✕</button>
 
-    <!-- LOGIN -->
     <div id="adminLogin">
-      <h3>Admin Login</h3>
-      <p>Only Imayan can access this</p>
-      <input type="password" id="adminPass" placeholder="Enter password" />
+      <h3>Admin Access</h3>
+      <p>Only Nirmal can enter here 🔐</p>
+      <div class="input-group" style="margin-top:.8rem">
+        <input type="password" id="adminPass" placeholder="Enter password" />
+      </div>
       <button class="submit-btn" onclick="adminLogin()">Login</button>
       <p id="loginError" class="error-msg hidden">Wrong password. Try again.</p>
     </div>
 
-    <!-- PANEL -->
     <div id="adminPanel" class="hidden">
       <h3>⚙️ Admin Panel</h3>
       <div class="admin-tabs">
         <button class="atab active" onclick="switchAdminTab('aWishes',this)">💌 Wishes</button>
-        <button class="atab" onclick="switchAdminTab('aAnon',this)">🕵️ Anon</button>
+        <button class="atab" onclick="switchAdminTab('aAnon',this)">🥷 Anon</button>
         <button class="atab" onclick="switchAdminTab('aQuiz',this)">🧠 Quiz</button>
         <button class="atab" onclick="switchAdminTab('aPhotos',this)">📸 Gallery</button>
         <button class="atab" onclick="switchAdminTab('aVideo',this)">🎬 Video</button>
         <button class="atab" onclick="switchAdminTab('aHero',this)">🖼️ Hero</button>
       </div>
 
-      <!-- ── WISHES ── -->
       <div id="aWishes" class="apanel active">
         <h4>All Wishes <span class="apanel-note">(private — only you see these)</span></h4>
         <div id="adminWishesList" class="admin-list"></div>
       </div>
-
-      <!-- ── ANON ── -->
       <div id="aAnon" class="apanel">
         <h4>Anonymous Messages <span class="apanel-note">(identities hidden)</span></h4>
         <div id="adminAnonList" class="admin-list"></div>
       </div>
-
-      <!-- ── QUIZ ── -->
       <div id="aQuiz" class="apanel">
         <h4>Full Quiz Leaderboard</h4>
         <div id="adminQuizList" class="admin-list"></div>
       </div>
-
-      <!-- ── GALLERY PHOTOS ── -->
       <div id="aPhotos" class="apanel">
         <h4>Manage Gallery Photos</h4>
-
-        <!-- Upload row -->
         <div class="admin-upload-row">
           <label class="file-label" for="galleryUpload">
             <input type="file" id="galleryUpload" accept="image/*" multiple />
@@ -276,16 +348,10 @@
           </label>
           <button class="submit-btn upload-btn" onclick="uploadGalleryPhotos()">Upload</button>
         </div>
-
-        <!-- Current photos grid with delete -->
         <div id="adminGallery" class="admin-gallery-preview"></div>
       </div>
-
-      <!-- ── VIDEO ── -->
       <div id="aVideo" class="apanel">
         <h4>Birthday Video</h4>
-
-        <!-- Upload row -->
         <div class="admin-upload-row">
           <label class="file-label" for="videoUpload">
             <input type="file" id="videoUpload" accept="video/*" />
@@ -294,18 +360,12 @@
           <button class="submit-btn upload-btn" onclick="uploadVideo()">Upload</button>
         </div>
         <p id="videoStatus" class="status-msg"></p>
-
-        <!-- Current video preview + delete -->
         <div id="adminVideoPreview"></div>
       </div>
-
-      <!-- ── HERO PHOTOS ── -->
       <div id="aHero" class="apanel">
         <h4>Home Page Hero Photos</h4>
         <p id="heroStatus" class="status-msg"></p>
-
-        <!-- Hero Slot 1 -->
-        <div class="hero-admin-slot" style="margin-bottom:.8rem;">
+        <div class="hero-admin-slot">
           <p class="hero-slot-label">📸 Photo 1 (Left)</p>
           <img id="heroPreview1" src="assets/photo1.jpeg" class="hero-preview-img" alt="Hero 1" />
           <div class="hero-slot-actions">
@@ -319,9 +379,7 @@
             <button class="del-btn-wide" id="heroDelBtn1" style="display:none;" onclick="deleteHeroPhoto(1)">🗑️ Remove — Revert to Default</button>
           </div>
         </div>
-
-        <!-- Hero Slot 2 -->
-        <div class="hero-admin-slot">
+        <div class="hero-admin-slot" style="margin-top:.8rem">
           <p class="hero-slot-label">📸 Photo 2 (Right)</p>
           <img id="heroPreview2" src="assets/photo2.jpeg" class="hero-preview-img" alt="Hero 2" />
           <div class="hero-slot-actions">
@@ -336,8 +394,7 @@
           </div>
         </div>
       </div>
-
-    </div><!-- end adminPanel -->
+    </div>
   </div>
 </div>
 
@@ -354,25 +411,27 @@
 <script src="js/confetti.js"></script>
 <script src="js/countdown.js"></script>
 
-<!-- Show filename in file labels -->
 <script>
   document.addEventListener('change', function(e) {
     if (e.target.type !== 'file') return;
-    const map = {
-      galleryUpload: 'galleryFileLabel',
-      videoUpload:   'videoFileLabel',
-      heroUpload1:   'heroFileLabel1',
-      heroUpload2:   'heroFileLabel2'
-    };
+    const map = { galleryUpload:'galleryFileLabel', videoUpload:'videoFileLabel', heroUpload1:'heroFileLabel1', heroUpload2:'heroFileLabel2' };
     const labelId = map[e.target.id];
     if (!labelId) return;
     const lbl = document.getElementById(labelId);
     if (!lbl) return;
     const files = e.target.files;
-    lbl.textContent = files.length > 1
-      ? `✅ ${files.length} files selected`
-      : files[0]?.name || '📁 Choose file';
+    lbl.textContent = files.length > 1 ? `✅ ${files.length} files selected` : files[0]?.name || '📁 Choose file';
   });
+
+  // Char counter for anon
+  const anonMsgEl = document.getElementById('anonMsg');
+  if (anonMsgEl) {
+    anonMsgEl.addEventListener('input', function() {
+      const rem = 500 - this.value.length;
+      const hint = document.getElementById('anonChars');
+      if (hint) hint.textContent = rem + ' characters remaining';
+    });
+  }
 </script>
 
 </body>

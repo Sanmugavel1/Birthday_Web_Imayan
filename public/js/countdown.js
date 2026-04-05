@@ -4,7 +4,7 @@
 // ══════════════════════════════════════════════
 
 (function() {
-  const BIRTHDAY = new Date('2026-04-02T00:00:00');
+  const BIRTHDAY = new Date('2026-04-07T00:00:00');
 
   function update() {
     const now  = new Date();
