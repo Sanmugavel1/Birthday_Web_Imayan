@@ -78,11 +78,11 @@ async function confirmAction(msg) {
 // ══ LOADING STATE HELPERS ════════════════════════════
 function setLoading(containerId, msg) {
   const el = document.getElementById(containerId);
-  if (el) el.innerHTML = `<p class="empty-hint" style="color:var(--gold);opacity:0.7;">⏳ ${msg}</p>`;
+  if (el) el.innerHTML = `<p class="empty-hint" style="color:var(--blue);opacity:0.7;">⏳ ${msg}</p>`;
 }
 function setError(containerId, msg) {
   const el = document.getElementById(containerId);
-  if (el) el.innerHTML = `<p class="empty-hint" style="color:#ff8080;">❌ ${msg}<br/><small style="opacity:0.6;">Check your server is running and ADMIN_PASSWORD matches.</small></p>`;
+  if (el) el.innerHTML = `<p class="empty-hint" style="color:#E03131;">❌ ${msg}<br/><small style="opacity:0.6;">Check your server is running and ADMIN_PASSWORD matches.</small></p>`;
 }
 
 // ══════════════════════════════════════════════════════
@@ -102,7 +102,7 @@ function fileToBase64(file) {
 // ══ NAVIGATION ═══════════════════════════════════════
 window.switchTab = function(name, el) {
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.bnav-btn').forEach(t => t.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
   el.classList.add('active');
   if (name === 'gallery') loadGallery();
@@ -438,7 +438,7 @@ async function showQuizResult() {
   const pct = Math.round((quizScore / QUIZ.length) * 100);
   document.getElementById('resultScore').textContent = quizScore;
   document.getElementById('resultTotal').textContent = '/' + QUIZ.length;
-  const msgs = ['Keep learning about Nirmal! 📚', 'Not bad! 😊', 'Pretty good! 🎉', 'Wow, you know Nirmal well! 🌟', 'Perfect score! You are Nirmal's biggest fan! 🏆'];
+  const msgs = ['Keep learning about Nirmal! 📚', 'Not bad! 😊', 'Pretty good! 🎉', 'Wow, you know Nirmal well! 🌟', "Perfect score! You are Nirmal's biggest fan! 🏆"];
   const idx  = pct < 20 ? 0 : pct < 40 ? 1 : pct < 60 ? 2 : pct < 80 ? 3 : 4;
   document.getElementById('resultMsg').textContent = msgs[idx];
   try {

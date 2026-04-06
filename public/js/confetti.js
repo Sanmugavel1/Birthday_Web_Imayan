@@ -9,7 +9,7 @@
 
   let W, H, particles = [], animId;
 
-  const COLORS = ['#FFD700','#FF6B8A','#CE93D8','#FF9800','#80CBC4','#F48FB1','#FFF176'];
+  const COLORS = ['#1A6BFF','#00D4FF','#FFFFFF','#FFD020','#FF4F9A','#7EB3FF','#2DFF8C','#3D85FF'];
   const SHAPES = ['circle','rect','triangle'];
 
   function resize() {
