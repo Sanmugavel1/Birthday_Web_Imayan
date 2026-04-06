@@ -9,16 +9,36 @@ const ADMIN_PASSWORD = "imayan2026"; // Must match ADMIN_PASSWORD in your .env e
 
 // ══ QUIZ DATA ════════════════════════════════════════
 const QUIZ = [
-  { q:"Q1. What is Imayan's favourite staff?",       opts:["Sumithra mam","Kasthuri mam","UHV Sir"],                            ans:0 },
-  { q:"Q2. What is Imayan's favourite God?",          opts:["Jesus","Shivan","Pran Baba"],                                       ans:2 },
-  { q:"Q3. Who is Imayan's favourite anime character?", opts:["Tsunade","Nami","Robin","Hancock"],                               ans:0 },
-  { q:"Q4. What is Imayan's lucky charm?",            opts:["Sanga","Nirmal","Tsunade","Himself"],                               ans:2 },
-  { q:"Q5. What is Imayan's favourite subject?",      opts:["Physics","DSP","Controls","Digital"],                               ans:3 },
-  { q:"Q6. What does Imayan spend most time on?",     opts:["Nirmal","Insta Reels","Reading","Movies"],                         ans:0 },
-  { q:"Q7. Who is Imayan's favourite student?",       opts:null,                                                                  ans:"gokul" },
-  { q:"Q8. What is Imayan's Goal?",                   opts:["Gate Exam","High LPA Job","Good Family Man","CAO Exam"],            ans:0 },
-  { q:"Q9. What is Imayan's favourite number?",       opts:["106","107","69","68"],                                              ans:0 },
-  { q:"Q10. Imayan is a…",                            opts:["Introvert","Extrovert","Ambivert","Omnivert"],                      ans:1 }
+  { q:"Q1. 🍳 What is Nirmal's daily side dish?",
+    opts:["Mixture","Potato","Always Egg","Hot Blood"],
+    ans:2 },
+  { q:"Q2. 🌈 Nirmal is gay or not?",
+    opts:["Yes","No","Both","Only in night"],
+    ans:3 },
+  { q:"Q3. 💘 Nirmal has had how many relationships?",
+    opts:["Yogi, Vasanth, Venkat","Imayan, Vasanth, Venkat","No relation just friend","Secret + All above"],
+    ans:0 },
+  { q:"Q4. ⚡ What is Nirmal's super power?",
+    opts:["Shape Shifter","Gender Shifter","Human","Imayan"],
+    ans:1 },
+  { q:"Q5. 🔢 What number does Nirmal like?",
+    opts:["69","4706","4520","4352"],
+    ans:1 },
+  { q:"Q6. 🏍️ What is Nirmal's fav stuff?",
+    opts:["His phone","Vasanth's Bullet","His pillow","Imayan's jokes"],
+    ans:1 },
+  { q:"Q7. 📛 Name Nirmal in a single word.",
+    opts:["Leg Shaker (Thoda Nadigi)","Joker","Pervert","Lover Boy"],
+    ans:2 },
+  { q:"Q8. 👶 Who is Nirmal's fav child?",
+    opts:["Khasi","Kamal KK","Radha"],
+    ans:0 },
+  { q:"Q9. 🤝 If a friend is in trouble, Nirmal will help and assist.",
+    opts:["True","False"],
+    ans:1 },
+  { q:"Q10. 👨‍🏫 Who is Nirmal's fav teacher?",
+    opts:["Imayan","Sanmugam","Pranesh","Master and Vasanth"],
+    ans:0 }
 ];
 
 let quizName='', quizRoll='', quizIdx=0, quizScore=0;
@@ -120,7 +140,7 @@ window.submitWish = async function() {
     });
     if (!res.ok) throw new Error(await res.text());
     ['wishName','wishRoll','wishTreat','wishMsg'].forEach(id => document.getElementById(id).value='');
-    showToast('💌 Wish sent! Only Imayan will see it 🎉', 'success');
+    showToast('💌 Wish sent! Only Nirmal will see it 🎉', 'success');
     loadPublicWishes();
   } catch(e) { showToast('❌ Failed to send: ' + e.message, 'error'); }
 };
@@ -418,7 +438,7 @@ async function showQuizResult() {
   const pct = Math.round((quizScore / QUIZ.length) * 100);
   document.getElementById('resultScore').textContent = quizScore;
   document.getElementById('resultTotal').textContent = '/' + QUIZ.length;
-  const msgs = ['Keep learning about Imayan! 📚', 'Not bad! 😊', 'Pretty good! 🎉', 'Wow, you know Imayan well! 🌟', 'Perfect score! You are Imayan\'s biggest fan! 🏆'];
+  const msgs = ['Keep learning about Nirmal! 📚', 'Not bad! 😊', 'Pretty good! 🎉', 'Wow, you know Nirmal well! 🌟', 'Perfect score! You are Nirmal's biggest fan! 🏆'];
   const idx  = pct < 20 ? 0 : pct < 40 ? 1 : pct < 60 ? 2 : pct < 80 ? 3 : 4;
   document.getElementById('resultMsg').textContent = msgs[idx];
   try {
